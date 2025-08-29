@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Srian Foundation - Professional Donation Website</title>
-
     
     <!-- Favicon -->
     <link rel="icon" type="image/png" sizes="32x32" href="https://ik.imagekit.io/gmxabb1dm/srian-logo.png?updatedAt=1753800313508">
@@ -553,7 +552,21 @@
             }
         });
         
-        const showThankYouModal = (name, amount) => {
+        const showThankYouModal = async (name, amount) => {
+            
+            // Fetch contact info
+            const contactRef = doc(db, "settings", "contactInfo");
+            const contactSnap = await getDoc(contactRef);
+            const contactData = contactSnap.exists() ? contactSnap.data() : {};
+
+            let contactHTML = '';
+            if (contactData.phone) contactHTML += `<a href="tel:${contactData.phone}" class="text-amber-700 hover:text-amber-900"><i class="fas fa-phone"></i></a>`;
+            if (contactData.email) contactHTML += `<a href="mailto:${contactData.email}" class="text-amber-700 hover:text-amber-900"><i class="fas fa-envelope"></i></a>`;
+            if (contactData.instagram) contactHTML += `<a href="${contactData.instagram}" target="_blank" class="text-amber-700 hover:text-amber-900"><i class="fab fa-instagram"></i></a>`;
+            if (contactData.facebook) contactHTML += `<a href="${contactData.facebook}" target="_blank" class="text-amber-700 hover:text-amber-900"><i class="fab fa-facebook-f"></i></a>`;
+            if (contactData.twitter) contactHTML += `<a href="${contactData.twitter}" target="_blank" class="text-amber-700 hover:text-amber-900"><i class="fab fa-twitter"></i></a>`;
+
+
             thankYouModalContent.innerHTML = `
                 <h2 class="text-2xl font-bold text-[var(--text-primary)] mb-2">Thank You, ${name}!</h2>
                 <p class="text-[var(--text-secondary)] mb-6">Your generous pledge of ₹${amount.toLocaleString('en-IN')} is deeply appreciated. As a special thank you, let's create a personalized note for you.</p>
@@ -581,12 +594,53 @@
                     ✨ Generate My Note
                 </button>
 
-                <div class="text-left p-4 bg-[var(--background-alt)] rounded-lg min-h-[150px] relative" id="note-card">
-                    <p id="note-output" class="text-[var(--text-secondary)] whitespace-pre-wrap"></p>
-                    <div id="loading-spinner" class="absolute inset-0 justify-center items-center bg-white/50 hidden" style="display: none;"><div class="spinner"></div></div>
+                <!-- UPDATED: Redesigned note card for a beautiful, branded look -->
+                <div id="note-card" class="relative overflow-hidden text-left p-6 rounded-lg min-h-[300px] bg-amber-50 border-2 border-amber-200 shadow-lg flex flex-col">
+                    <!-- Watermark Logo -->
+                    <div class="absolute inset-0 flex justify-center items-center z-0">
+                        <img src="${document.getElementById('website-logo').src}" alt="Logo Watermark" class="h-40 w-40 opacity-5">
+                    </div>
+
+                    <!-- Floral Decorations -->
+                    <div class="absolute top-1 left-1 w-16 h-16 text-amber-100 -z-0"><svg viewBox="0 0 100 100"><path d="M 10 10 C 20 40, 40 20, 50 10 L 10 50 C 20 40, 40 20, 10 10" fill="currentColor"></path></svg></div>
+                    <div class="absolute bottom-1 right-1 w-16 h-16 text-amber-100 -z-0 transform rotate-180"><svg viewBox="0 0 100 100"><path d="M 10 10 C 20 40, 40 20, 50 10 L 10 50 C 20 40, 40 20, 10 10" fill="currentColor"></path></svg></div>
+                    
+                    <!-- Content Wrapper -->
+                    <div class="relative z-10 flex flex-col flex-grow">
+                        <!-- Header with Indian SVG and Logo -->
+                        <div class="text-center mb-4">
+                            <svg width="100%" height="25" viewBox="0 0 200 20" preserveAspectRatio="none" class="text-amber-400 mb-2">
+                              <path d="M0,10 Q25,0 50,10 T100,10 T150,10 T200,10" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                              <path d="M0,12 Q25,2 50,12 T100,12 T150,12 T200,12" stroke="currentColor" stroke-width="0.5" fill="none"/>
+                              <circle cx="100" cy="10" r="4" fill="currentColor" stroke="#fffbeb" stroke-width="1.5"/>
+                            </svg>
+                            <div class="flex items-center justify-center gap-3">
+                                <img src="${document.getElementById('website-logo').src}" alt="Logo" class="h-12 w-12 rounded-full border-2 border-white shadow-md">
+                                <div>
+                                    <h3 class="font-bold text-lg text-amber-800" style="font-family: 'Poppins', sans-serif;">Srian Foundation</h3>
+                                    <p class="text-xs text-amber-700">A Note of Gratitude</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Generated Text -->
+                        <div class="flex-grow">
+                            <p id="note-output" class="text-gray-700 whitespace-pre-wrap text-base leading-relaxed text-center font-serif italic min-h-[100px]"></p>
+                        </div>
+                        
+                        <!-- NEW: Contact Info Footer -->
+                        <div class="mt-auto pt-4 border-t border-amber-200 text-center">
+                            <p class="text-xs text-amber-800 font-semibold mb-2">Connect With Us</p>
+                            <div class="flex justify-center items-center space-x-4 text-lg">
+                                ${contactHTML}
+                            </div>
+                        </div>
+                    </div>
+                     <!-- Loading Spinner -->
+                    <div id="loading-spinner" class="absolute inset-0 flex justify-center items-center bg-amber-50/80" style="display: none;"><div class="spinner"></div></div>
                 </div>
 
-                <div id="note-actions" class="mt-4 flex-wrap gap-2 justify-center" style="display: none;">
+                <div id="note-actions" class="mt-4 flex flex-wrap gap-2 justify-center" style="display: none;">
                      <button id="regenerate-note-btn" class="bg-gray-200 text-sm px-3 py-1 rounded-full"><i class="fas fa-sync-alt mr-1"></i> Try Again</button>
                      <button id="copy-note-btn" class="bg-gray-200 text-sm px-3 py-1 rounded-full"><i class="fas fa-copy mr-1"></i> Copy</button>
                      <button id="download-png-btn" class="bg-gray-200 text-sm px-3 py-1 rounded-full"><i class="fas fa-image mr-1"></i> PNG</button>
@@ -624,7 +678,7 @@
             });
 
             downloadPngBtn.addEventListener('click', () => {
-                html2canvas(document.querySelector("#note-card")).then(canvas => {
+                html2canvas(document.querySelector("#note-card"), { scale: 2 }).then(canvas => {
                     const link = document.createElement('a');
                     link.download = 'srian-foundation-thank-you.png';
                     link.href = canvas.toDataURL();
@@ -633,12 +687,22 @@
             });
 
             downloadPdfBtn.addEventListener('click', () => {
+                const noteCard = document.querySelector("#note-card");
                 const { jsPDF } = window.jspdf;
-                const doc = new jsPDF();
-                const text = noteOutput.textContent;
-                const splitText = doc.splitTextToSize(text, 180);
-                doc.text(splitText, 10, 10);
-                doc.save('srian-foundation-thank-you.pdf');
+
+                html2canvas(noteCard, { scale: 3 })
+                .then(canvas => {
+                    const imgData = canvas.toDataURL('image/png');
+                    const pdfWidth = 595; 
+                    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+                    const pdf = new jsPDF({
+                        orientation: 'portrait',
+                        unit: 'pt',
+                        format: [pdfWidth, pdfHeight]
+                    });
+                    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+                    pdf.save('srian-foundation-thank-you.pdf');
+                });
             });
 
             closeBtn.addEventListener('click', () => thankYouModal.classList.remove('visible'));
@@ -1328,6 +1392,21 @@
                             <button type="submit" class="bg-indigo-600 text-white font-semibold px-8 py-3 rounded-full w-full hover:bg-indigo-700 disabled:bg-gray-400">Upload New Logo</button>
                         </form>
                     </div>
+                    
+                    <!-- NEW: Manage Contact Info -->
+                    <div class="bg-white p-8 rounded-2xl shadow-lg mb-12">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-6">Manage Contact Information</h2>
+                        <form id="contact-info-form" class="space-y-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <input type="text" name="phone" placeholder="Phone Number (e.g., +91...)" class="p-3 border rounded-lg w-full" />
+                                <input type="email" name="email" placeholder="Contact Email" class="p-3 border rounded-lg w-full" />
+                                <input type="url" name="instagram" placeholder="Instagram URL" class="p-3 border rounded-lg w-full" />
+                                <input type="url" name="facebook" placeholder="Facebook URL" class="p-3 border rounded-lg w-full" />
+                                <input type="url" name="twitter" placeholder="Twitter/X URL" class="p-3 border rounded-lg w-full" />
+                            </div>
+                            <button type="submit" class="bg-orange-500 text-white font-semibold px-8 py-3 rounded-full w-full hover:bg-orange-600">Save Contact Details</button>
+                        </form>
+                    </div>
 
                     <!-- Manage Goals Section -->
                     <div class="bg-white p-8 rounded-2xl shadow-lg mb-12">
@@ -1438,6 +1517,9 @@
 
             // Add Logo Form Logic
             container.querySelector('#logo-form').addEventListener('submit', handleLogoUpload);
+
+            // Add Contact Info Form Logic
+            container.querySelector('#contact-info-form').addEventListener('submit', handleContactUpdate);
             
             // Add Goal Form Logic
             container.querySelector('#add-goal-form').addEventListener('submit', handleAddGoal);
@@ -1536,6 +1618,7 @@
             // Load initial data for the dashboard
             loadAdminBannerForm();
             loadAdminImpactForm();
+            loadAdminContactForm(); // Load new contact data
             loadAdminGoalsList();
             loadAdminDonorsList();
             loadAdminGalleryList();
@@ -1791,6 +1874,21 @@
             }
         };
 
+        const loadAdminContactForm = async () => {
+            const form = document.getElementById('contact-info-form');
+            if (!form) return;
+            const contactRef = doc(db, "settings", "contactInfo");
+            const contactSnap = await getDoc(contactRef);
+            if (contactSnap.exists()) {
+                const data = contactSnap.data();
+                form.phone.value = data.phone || '';
+                form.email.value = data.email || '';
+                form.instagram.value = data.instagram || '';
+                form.facebook.value = data.facebook || '';
+                form.twitter.value = data.twitter || '';
+            }
+        };
+
         // --- Event Handlers ---
         const handleNavClick = (e) => {
             e.preventDefault();
@@ -1894,6 +1992,24 @@
                 showModal("Impact stats updated successfully!");
             } catch (error) {
                 showModal("Error updating impact stats: " + error.message);
+            }
+        };
+        
+        const handleContactUpdate = async (e) => {
+            e.preventDefault();
+            const form = e.target;
+            const contactData = {
+                phone: form.phone.value,
+                email: form.email.value,
+                instagram: form.instagram.value,
+                facebook: form.facebook.value,
+                twitter: form.twitter.value,
+            };
+            try {
+                await setDoc(doc(db, "settings", "contactInfo"), contactData);
+                showModal("Contact information updated successfully!");
+            } catch (error) {
+                showModal("Error updating contact info: " + error.message);
             }
         };
 
@@ -2159,13 +2275,13 @@
             const prompt = `Generate a short, ${tone} thank you message for a donation to our charity, the Srian Foundation. The donor's name is ${name} and they pledged ₹${amount}. The message should focus on our ${focus} program. Keep it under 60 words and sign it from 'The Srian Foundation Team'.`;
 
             try {
-                // **MODIFIED:** The API call now points to your secure "middleman" function.
+                // This will use the secure middleman when deployed on Vercel.
+                // In the local canvas environment, it might not work if not configured.
                 const apiUrl = `/api/generate-note`; 
                 
                 const response = await fetch(apiUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    // **MODIFIED:** We now send the prompt in the body.
                     body: JSON.stringify({ prompt: prompt })
                 });
 
@@ -2199,7 +2315,7 @@
                 }
             } catch (error) {
                 console.error('Gemini API Error:', error);
-                noteContainer.textContent = "Sorry, we couldn't generate a message at this time. But please know we are incredibly grateful for your support!";
+                noteContainer.textContent = "Sorry, we couldn't generate a message at this time. But please know we are incredibly grateful for your support! (This feature requires online deployment to work).";
                 actionButtons.style.display = 'flex';
             } finally {
                 loadingSpinner.style.display = 'none';
@@ -2340,6 +2456,4 @@
     </script>
 </body>
 </html>
-
-
 
