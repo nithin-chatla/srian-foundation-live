@@ -1,25 +1,30 @@
-// This is a secure serverless function that acts as a "middleman".
-// It will run on a server, not in the user's browser.
+// This is the updated secure serverless function with added logging.
+// This will help us see exactly what's happening on the Vercel server.
 
 export default async function handler(req, res) {
-  // 1. We only accept POST requests to this function.
+  // Log that the function was triggered
+  console.log("generate-note function started.");
+
   if (req.method !== 'POST') {
+    console.error("Error: Method was not POST.");
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
-  // 2. Get the prompt from the website's request.
   const { prompt } = req.body;
+  console.log("Received prompt:", prompt);
 
   if (!prompt) {
+    console.error("Error: Prompt was not received in the request body.");
     return res.status(400).json({ error: 'Prompt is required' });
   }
 
-  // 3. Securely get your secret API key from the server's environment variables.
-  //    This key is NEVER exposed to the public.
-  const apiKey = process.env.GOOGLE_API_KEY;
+  // Check if the API key is available on the server
+  const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
-    return res.status(500).json({ error: 'API key not configured' });
+    console.error("CRITICAL ERROR: GEMINI_API_KEY environment variable is not set on Vercel!");
+    return res.status(500).json({ error: 'API key not configured on the server.' });
   }
+  console.log("GEMINI_API_KEY has been found."); // Security: Don't log the key itself
 
   const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
   
@@ -28,7 +33,7 @@ export default async function handler(req, res) {
   };
 
   try {
-    // 4. Call the Google AI API from the secure server.
+    console.log("Sending request to Google AI API...");
     const response = await fetch(apiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -37,22 +42,24 @@ export default async function handler(req, res) {
 
     if (!response.ok) {
         const errorData = await response.json();
-        console.error("Google AI API Error:", errorData);
-        throw new Error('Failed to generate content from Google AI.');
+        console.error("Google AI API returned an error:", errorData);
+        throw new Error('Failed to get a valid response from Google AI.');
     }
 
     const result = await response.json();
     
-    // 5. Send the generated text back to your website.
     if (result.candidates && result.candidates.length > 0) {
         const text = result.candidates[0].content.parts[0].text;
+        console.log("Successfully received AI-generated text.");
         res.status(200).json({ text: text });
     } else {
+        console.error("Error: Google AI response did not contain any candidates.", result);
         throw new Error("No content generated.");
     }
 
   } catch (error) {
-    console.error('Internal Server Error:', error);
+    console.error('Internal Server Error:', error.message);
     res.status(500).json({ error: error.message });
   }
 }
+
