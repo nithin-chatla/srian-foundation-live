@@ -16,7 +16,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Dancing+Script:wght@400..700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
     
     <!-- GSAP Animation Library -->
@@ -26,6 +26,8 @@
     <!-- PDF & Image Generation Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
 
     <style>
         :root {
@@ -165,6 +167,9 @@
             background-color: var(--primary);
             transition: width 0.5s ease-in-out;
         }
+        /* Custom font styles */
+        .font-serif { font-family: 'Playfair Display', serif; }
+        .font-script { font-family: 'Dancing Script', cursive; }
     </style>
 </head>
 <body>
@@ -552,9 +557,8 @@
             }
         });
         
-        const showThankYouModal = async (name, amount) => {
+        const showThankYouModal = async (name, amount, goalTitle) => {
             
-            // Fetch contact info
             const contactRef = doc(db, "settings", "contactInfo");
             const contactSnap = await getDoc(contactRef);
             const contactData = contactSnap.exists() ? contactSnap.data() : {};
@@ -571,119 +575,120 @@
             if (contactData.twitter) socialIconsHTML += `<a href="${contactData.twitter}" target="_blank" class="text-amber-700 hover:text-amber-900"><i class="fab fa-twitter"></i></a>`;
             socialIconsHTML += '</div>';
 
+            const pledgeDate = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+
             thankYouModalContent.innerHTML = `
-                <h2 class="text-2xl font-bold text-[var(--text-primary)] mb-2">Thank You, ${name}!</h2>
-                <p class="text-[var(--text-secondary)] mb-6">Your generous pledge of ₹${amount.toLocaleString('en-IN')} is deeply appreciated. As a special thank you, let's create a personalized note for you.</p>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 text-left">
-                    <div>
-                        <label for="note-tone" class="block text-sm font-medium text-[var(--text-secondary)]">Choose a Tone:</label>
-                        <select id="note-tone" class="mt-1 p-2 border rounded-lg w-full bg-[var(--background-alt)]">
-                            <option value="heartfelt">Heartfelt</option>
-                            <option value="formal">Formal</option>
-                            <option value="joyful">Joyful</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="note-focus" class="block text-sm font-medium text-[var(--text-secondary)]">Focus On:</label>
-                        <select id="note-focus" class="mt-1 p-2 border rounded-lg w-full bg-[var(--background-alt)]">
-                            <option value="food">Food Program</option>
-                            <option value="education">Education Program</option>
-                            <option value="general support">General Support</option>
-                        </select>
-                    </div>
-                </div>
+                 <div>
+                    <div id="note-card" class="relative overflow-hidden text-left p-1 rounded-lg bg-gradient-to-br from-amber-200 to-yellow-200 shadow-xl" style="background-image: url('https://www.transparenttextures.com/patterns/light-paper-fibers.png');">
+                        <div class="relative bg-slate-50/80 backdrop-blur-sm p-5 rounded-md border-2 border-amber-400/50">
+                            <div class="absolute inset-0 flex justify-center items-center z-0">
+                                <img src="${document.getElementById('website-logo').src}" alt="Logo Watermark" class="h-32 w-32 opacity-10">
+                            </div>
+                            <!-- Corner Graphics -->
+                             <div class="absolute top-2 left-2 w-16 h-16 text-amber-300/70"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2zm0 18c4.411 0 8-3.589 8-8s-3.589-8-8-8-8 3.589-8 8 3.589 8 8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/></svg></div>
+                            <div class="absolute bottom-2 right-2 w-16 h-16 text-amber-300/70 transform rotate-180"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2zm0 18c4.411 0 8-3.589 8-8s-3.589-8-8-8-8 3.589-8 8 3.589 8 8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/></svg></div>
 
-                <button id="generate-note-btn" class="bg-yellow-400 text-yellow-900 font-semibold px-6 py-2 rounded-full w-full mb-4 hover:bg-yellow-500 transition-colors">
-                    ✨ Generate My Note
-                </button>
+                            <div class="relative z-10 flex flex-col flex-grow min-h-[350px]">
+                                <div class="text-center mb-4">
+                                    <div class="flex items-center justify-center gap-3">
+                                        <img src="${document.getElementById('website-logo').src}" alt="Logo" class="h-12 w-12 rounded-full border-2 border-white shadow-md">
+                                        <div>
+                                            <h3 class="font-bold text-lg text-amber-800" style="font-family: 'Poppins', sans-serif;">Srian Foundation</h3>
+                                            <p class="text-xs text-amber-700">Certificate of Appreciation</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="text-center my-4 space-y-1">
+                                     <p class="text-sm text-gray-600">This certificate is proudly presented to</p>
+                                     <h2 class="text-3xl font-bold text-amber-900 font-script">${name}</h2>
+                                     <p class="text-sm text-gray-600">in recognition of their generous pledge of</p>
+                                     <p class="text-3xl font-bold text-amber-900">₹${amount.toLocaleString('en-IN')}</p>
+                                     <p class="text-sm text-gray-600">on ${pledgeDate}</p>
+                                     <p class="text-sm text-gray-600">In Support Of: <span class="font-semibold">${goalTitle}</span></p>
+                                </div>
 
-                <div id="note-card" class="relative overflow-hidden text-left p-6 rounded-lg min-h-[300px] bg-amber-50 border-2 border-amber-200 shadow-lg flex flex-col">
-                    <div class="absolute inset-0 flex justify-center items-center z-0">
-                        <img src="${document.getElementById('website-logo').src}" alt="Logo Watermark" class="h-40 w-40 opacity-5">
-                    </div>
-                    <div class="absolute top-1 left-1 w-16 h-16 text-amber-100 -z-0"><svg viewBox="0 0 100 100"><path d="M 10 10 C 20 40, 40 20, 50 10 L 10 50 C 20 40, 40 20, 10 10" fill="currentColor"></path></svg></div>
-                    <div class="absolute bottom-1 right-1 w-16 h-16 text-amber-100 -z-0 transform rotate-180"><svg viewBox="0 0 100 100"><path d="M 10 10 C 20 40, 40 20, 50 10 L 10 50 C 20 40, 40 20, 10 10" fill="currentColor"></path></svg></div>
-                    
-                    <div class="relative z-10 flex flex-col flex-grow">
-                        <div class="text-center mb-4">
-                            <svg width="100%" height="25" viewBox="0 0 200 20" preserveAspectRatio="none" class="text-amber-400 mb-2">
-                              <path d="M0,10 Q25,0 50,10 T100,10 T150,10 T200,10" stroke="currentColor" stroke-width="1.5" fill="none"/>
-                              <path d="M0,12 Q25,2 50,12 T100,12 T150,12 T200,12" stroke="currentColor" stroke-width="0.5" fill="none"/>
-                              <circle cx="100" cy="10" r="4" fill="currentColor" stroke="#fffbeb" stroke-width="1.5"/>
-                            </svg>
-                            <div class="flex items-center justify-center gap-3">
-                                <img src="${document.getElementById('website-logo').src}" alt="Logo" class="h-12 w-12 rounded-full border-2 border-white shadow-md">
-                                <div>
-                                    <h3 class="font-bold text-lg text-amber-800" style="font-family: 'Poppins', sans-serif;">Srian Foundation</h3>
-                                    <p class="text-xs text-amber-700">A Note of Gratitude</p>
+                                <div id="gemini-message-container" class="flex-grow my-4">
+                                     <p id="note-output" class="text-gray-700 whitespace-pre-wrap text-base leading-relaxed text-center font-serif italic min-h-[70px]"></p>
+                                     <div id="loading-spinner" class="flex justify-center items-center py-4" style="display: none;"><div class="spinner"></div></div>
+                                </div>
+                                
+                                <div class="mt-auto pt-4 border-t-2 border-dashed border-amber-300 flex justify-between items-center">
+                                    <div id="qrcode" class="w-16 h-16 bg-white p-1 rounded-md shadow-sm"></div>
+                                    <div class="text-right">
+                                        ${contactDetailsHTML}
+                                        ${socialIconsHTML}
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        
-                        <div class="flex-grow">
-                            <p id="note-output" class="text-gray-700 whitespace-pre-wrap text-base leading-relaxed text-center font-serif italic min-h-[100px]"></p>
-                        </div>
-                        
-                        <div class="mt-auto pt-4 border-t border-amber-200 text-center">
-                            ${contactDetailsHTML}
-                            ${socialIconsHTML}
-                        </div>
                     </div>
-                    <div id="loading-spinner" class="absolute inset-0 flex justify-center items-center bg-amber-50/80" style="display: none;"><div class="spinner"></div></div>
-                </div>
 
-                <div id="note-actions" class="mt-4 flex flex-wrap gap-2 justify-center" style="display: none;">
-                     <button id="regenerate-note-btn" class="bg-gray-200 text-sm px-3 py-1 rounded-full"><i class="fas fa-sync-alt mr-1"></i> Try Again</button>
-                     <button id="copy-note-btn" class="bg-gray-200 text-sm px-3 py-1 rounded-full"><i class="fas fa-copy mr-1"></i> Copy</button>
-                     <button id="download-png-btn" class="bg-gray-200 text-sm px-3 py-1 rounded-full"><i class="fas fa-image mr-1"></i> PNG</button>
-                     <button id="download-pdf-btn" class="bg-gray-200 text-sm px-3 py-1 rounded-full"><i class="fas fa-file-pdf mr-1"></i> PDF</button>
-                     <a id="share-whatsapp-btn" href="#" target="_blank" class="bg-green-500 text-white text-sm px-3 py-1 rounded-full"><i class="fab fa-whatsapp mr-1"></i> WhatsApp</a>
-                     <a id="share-twitter-btn" href="#" target="_blank" class="bg-blue-400 text-white text-sm px-3 py-1 rounded-full"><i class="fab fa-twitter mr-1"></i> Share on X</a>
+                    <div id="note-actions" class="mt-4 flex flex-wrap gap-2 justify-center" style="display: none;">
+                         <button id="regenerate-note-btn" class="bg-gray-200 text-sm px-3 py-1 rounded-full"><i class="fas fa-sync-alt mr-1"></i> Regenerate Note</button>
+                         <button id="copy-note-btn" class="bg-gray-200 text-sm px-3 py-1 rounded-full"><i class="fas fa-copy mr-1"></i> Copy Text</button>
+                         <button id="download-png-btn" class="bg-gray-200 text-sm px-3 py-1 rounded-full"><i class="fas fa-image mr-1"></i> PNG</button>
+                         <button id="download-pdf-btn" class="bg-gray-200 text-sm px-3 py-1 rounded-full"><i class="fas fa-file-pdf mr-1"></i> PDF</button>
+                    </div>
+                    
+                    <button id="close-thank-you-modal" class="bg-[var(--primary)] text-white font-semibold px-8 py-2 rounded-full hover:opacity-90 transition-colors mt-6">Done</button>
                 </div>
-                
-                <button id="close-thank-you-modal" class="bg-[var(--primary)] text-white font-semibold px-8 py-2 rounded-full hover:opacity-90 transition-colors mt-6">Done</button>
             `;
 
-            const generateBtn = thankYouModalContent.querySelector('#generate-note-btn');
+            new QRCode(document.getElementById("qrcode"), {
+                text: window.location.origin,
+                width: 64,
+                height: 64,
+            });
+
             const regenerateBtn = thankYouModalContent.querySelector('#regenerate-note-btn');
             const copyBtn = thankYouModalContent.querySelector('#copy-note-btn');
             const downloadPngBtn = thankYouModalContent.querySelector('#download-png-btn');
             const downloadPdfBtn = thankYouModalContent.querySelector('#download-pdf-btn');
-            const noteToneSelect = thankYouModalContent.querySelector('#note-tone');
-            const noteFocusSelect = thankYouModalContent.querySelector('#note-focus');
-            const noteOutput = thankYouModalContent.querySelector('#note-output');
             const closeBtn = thankYouModalContent.querySelector('#close-thank-you-modal');
             
             const generateAction = () => {
-                const tone = noteToneSelect.value;
-                const focus = noteFocusSelect.value;
-                generateThankYouNote(name, amount, tone, focus);
+                generateThankYouNote(name, amount, "heartfelt", goalTitle);
             };
 
-            generateBtn.addEventListener('click', generateAction);
+            generateAction(); // Generate note automatically on open
             regenerateBtn.addEventListener('click', generateAction);
 
             copyBtn.addEventListener('click', () => {
-                navigator.clipboard.writeText(noteOutput.textContent).then(() => {
+                const textToCopy = thankYouModalContent.querySelector('#note-output').textContent;
+                navigator.clipboard.writeText(textToCopy).then(() => {
                     alert("Copied to clipboard!");
                 });
             });
 
             downloadPngBtn.addEventListener('click', () => {
-                html2canvas(document.querySelector("#note-card"), { scale: 2 }).then(canvas => {
+                const noteCard = document.getElementById('note-card');
+                const clone = noteCard.cloneNode(true);
+                document.body.appendChild(clone);
+                clone.style.position = 'absolute';
+                clone.style.left = '-9999px';
+                clone.style.width = '500px';
+
+                html2canvas(clone, { useCORS: true, scale: 3 }).then(canvas => {
                     const link = document.createElement('a');
                     link.download = 'srian-foundation-thank-you.png';
                     link.href = canvas.toDataURL();
                     link.click();
+                    document.body.removeChild(clone);
                 });
             });
 
             downloadPdfBtn.addEventListener('click', () => {
-                const noteCard = document.querySelector("#note-card");
+                const noteCard = document.getElementById('note-card');
+                const clone = noteCard.cloneNode(true);
+                document.body.appendChild(clone);
+                clone.style.position = 'absolute';
+                clone.style.left = '-9999px';
+                clone.style.width = '500px';
+
                 const { jsPDF } = window.jspdf;
 
-                html2canvas(noteCard, { scale: 3 })
+                html2canvas(clone, { useCORS: true, scale: 3 })
                 .then(canvas => {
                     const imgData = canvas.toDataURL('image/png');
                     const pdfWidth = 595; 
@@ -695,6 +700,7 @@
                     });
                     pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
                     pdf.save('srian-foundation-thank-you.pdf');
+                    document.body.removeChild(clone);
                 });
             });
 
@@ -894,53 +900,92 @@
             form.addEventListener('submit', handleDonationSubmit);
         };
         
-        const renderTestimonials = (container) => {
-            container.innerHTML = `
-                <div class="container mx-auto px-4 text-center">
-                    <div class="section-title">
-                        <h2 class="text-3xl md:text-4xl font-bold text-[var(--text-primary)]">Voices from Our Community 📣</h2>
-                    </div>
-                    <div id="testimonials-grid" class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
-                        <!-- Mock Testimonials for Demo -->
-                        <div class="testimonial-card hover-card bg-[var(--background-alt)] p-8 rounded-2xl shadow-lg">
-                            <p class="text-[var(--text-secondary)] italic">"The transparency and impact of Srian Foundation are truly remarkable. It's a privilege to be a part of this community."</p>
-                            <p class="font-bold text-[var(--text-primary)] mt-4">- Priya Sharma</p>
-                        </div>
-                         <div class="testimonial-card hover-card bg-[var(--background-alt)] p-8 rounded-2xl shadow-lg">
-                            <p class="text-[var(--text-secondary)] italic">"Seeing the smiles on the children's faces makes every contribution worthwhile. Thank you for your incredible work!"</p>
-                            <p class="font-bold text-[var(--text-primary)] mt-4">- Rohan Gupta</p>
-                        </div>
-                         <div class="testimonial-card hover-card bg-[var(--background-alt)] p-8 rounded-2xl shadow-lg">
-                            <p class="text-[var(--text-secondary)] italic">"A fantastic organization that genuinely makes a difference. Their dedication to education is inspiring."</p>
-                            <p class="font-bold text-[var(--text-primary)] mt-4">- Anjali Mehta</p>
-                        </div>
-                    </div>
+        const renderTestimonials = async (container) => {
+            if (!container) return;
+            container.innerHTML = `<div class="container mx-auto px-4 text-center">
+                <div class="section-title">
+                    <h2 class="text-3xl md:text-4xl font-bold text-[var(--text-primary)]">Voices from Our Community 📣</h2>
                 </div>
-            `;
+                <div id="testimonials-grid" class="flex flex-wrap justify-center gap-8 mt-12">
+                    <div class="flex justify-center items-center p-8"><div class="spinner"></div></div>
+                </div>
+            </div>`;
+
+            const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+            const testimonialsCollectionPath = `/artifacts/${appId}/public/data/testimonials`;
+            const q = query(collection(db, testimonialsCollectionPath), orderBy("createdAt", "desc"));
+            
+            try {
+                const snapshot = await getDocs(q);
+                const grid = container.querySelector('#testimonials-grid');
+                if (snapshot.empty) {
+                    grid.innerHTML = `<p class="col-span-full text-center text-[var(--text-secondary)]">No testimonials yet. Be the first to share your story!</p>`;
+                    return;
+                }
+                
+                grid.innerHTML = snapshot.docs.map(doc => {
+                    const testimonial = doc.data();
+                    return `
+                        <div class="testimonial-card w-full md:max-w-sm hover-card bg-[var(--background-alt)] p-8 rounded-2xl shadow-lg">
+                            <p class="text-[var(--text-secondary)] italic">"${testimonial.quote}"</p>
+                            <p class="font-bold text-[var(--text-primary)] mt-4">- ${testimonial.name}</p>
+                        </div>
+                    `;
+                }).join('');
+
+                document.querySelectorAll('.testimonial-card').forEach((card, index) => {
+                    animateOnScroll(card, { opacity: 0, y: 50 }, { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out', delay: index * 0.2 });
+                });
+
+            } catch(error) {
+                console.error("Error fetching testimonials:", error);
+                container.querySelector('#testimonials-grid').innerHTML = `<p class="col-span-full text-center text-red-500">Could not load testimonials.</p>`;
+            }
         };
 
-        const renderGalleryPreview = (container) => {
-             const galleryImages = [
-                 'https://picsum.photos/seed/event1/400/400', 'https://picsum.photos/seed/event2/400/400',
-                 'https://picsum.photos/seed/event3/400/400', 'https://picsum.photos/seed/event4/400/400',
-             ];
-            container.innerHTML = `
-                <div class="container mx-auto px-4 text-center">
-                    <div class="section-title">
-                        <h2 class="text-3xl md:text-4xl font-bold text-[var(--text-primary)]">A Glimpse of the Smiles You Create 😊</h2>
-                        <p class="mt-4 text-lg text-[var(--text-secondary)] max-w-3xl mx-auto">Moments from our food distribution and education support events.</p>
+        const renderGalleryPreview = async (container) => {
+            if (!container) return;
+            
+            const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+            const galleryCollectionPath = `/artifacts/${appId}/public/data/gallery`;
+            const q = query(collection(db, galleryCollectionPath), orderBy("createdAt", "desc"), limit(4));
+
+            try {
+                const snapshot = await getDocs(q);
+                if (snapshot.empty) {
+                    container.style.display = 'none'; // Hide the section if no images
+                    return;
+                }
+
+                const galleryImages = snapshot.docs.map(doc => doc.data().imageUrl);
+                
+                container.innerHTML = `
+                    <div class="container mx-auto px-4 text-center">
+                        <div class="section-title">
+                            <h2 class="text-3xl md:text-4xl font-bold text-[var(--text-primary)]">A Glimpse of the Smiles You Create 😊</h2>
+                            <p class="mt-4 text-lg text-[var(--text-secondary)] max-w-3xl mx-auto">Moments from our food distribution and education support events.</p>
+                        </div>
+                        <div class="flex flex-wrap justify-center gap-4 mt-12 gallery-preview-grid">
+                            ${galleryImages.map(src => `<div class="gallery-item w-full sm:w-1/2 md:w-1/4 rounded-lg shadow-md"><img src="${src}" class="w-full h-full object-cover" /></div>`).join('')}
+                        </div>
+                        <div class="text-center mt-12">
+                            <a href="#" data-page="gallery" class="nav-link bg-[var(--primary)] text-white font-semibold px-8 py-3 rounded-full hover:opacity-90 transition-colors">
+                                View Full Gallery
+                            </a>
+                        </div>
                     </div>
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12 gallery-preview-grid">
-                        ${galleryImages.map(src => `<div class="gallery-item rounded-lg shadow-md"><img src="${src}" class="w-full h-full object-cover" /></div>`).join('')}
-                    </div>
-                    <div class="text-center mt-12">
-                        <a href="#" data-page="gallery" class="nav-link bg-[var(--primary)] text-white font-semibold px-8 py-3 rounded-full hover:opacity-90 transition-colors">
-                            View Full Gallery
-                        </a>
-                    </div>
-                </div>
-            `;
-            container.querySelector('.nav-link').addEventListener('click', handleNavClick);
+                `;
+                container.style.display = 'block';
+                container.querySelector('.nav-link').addEventListener('click', handleNavClick);
+                
+                 document.querySelectorAll('.gallery-preview-grid .gallery-item').forEach((img, index) => {
+                    animateOnScroll(img, { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.8, ease: 'power3.out', delay: index * 0.1 });
+                });
+
+            } catch (error) {
+                console.error("Error fetching gallery preview:", error);
+                container.style.display = 'none';
+            }
         };
 
         const renderContactSection = (container) => {
@@ -998,14 +1043,9 @@
                 document.querySelectorAll('.mission-card').forEach((card, index) => {
                     animateOnScroll(card, { opacity: 0, y: 50 }, { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out', delay: index * 0.2 });
                 });
-                document.querySelectorAll('.testimonial-card').forEach((card, index) => {
-                    animateOnScroll(card, { opacity: 0, y: 50 }, { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out', delay: index * 0.2 });
-                });
-                document.querySelectorAll('.gallery-preview-grid .gallery-item').forEach((img, index) => {
-                    animateOnScroll(img, { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.8, ease: 'power3.out', delay: index * 0.1 });
-                });
-                 animateOnScroll('.donation-form-container', { opacity: 0, y: 50 }, { opacity: 1, y: 0, duration: 1, ease: 'power3.out' });
-                 animateOnScroll('#home-contact-section .contact-form-container', { opacity: 0, y: 50 }, { opacity: 1, y: 0, duration: 1, ease: 'power3.out' });
+                
+                animateOnScroll('.donation-form-container', { opacity: 0, y: 50 }, { opacity: 1, y: 0, duration: 1, ease: 'power3.out' });
+                animateOnScroll('#home-contact-section .contact-form-container', { opacity: 0, y: 50 }, { opacity: 1, y: 0, duration: 1, ease: 'power3.out' });
             }
             
             if (page === 'gallery') {
@@ -1386,7 +1426,7 @@
                         </form>
                     </div>
                     
-                    <!-- NEW: Manage Contact Info -->
+                    <!-- Manage Contact Info -->
                     <div class="bg-white p-8 rounded-2xl shadow-lg mb-12">
                         <h2 class="text-2xl font-bold text-gray-800 mb-6">Manage Contact Information</h2>
                         <form id="contact-info-form" class="space-y-4">
@@ -1399,6 +1439,18 @@
                                 <input type="url" name="twitter" placeholder="Twitter/X URL" class="p-3 border rounded-lg w-full" />
                             </div>
                             <button type="submit" class="bg-orange-500 text-white font-semibold px-8 py-3 rounded-full w-full hover:bg-orange-600">Save Contact Details</button>
+                        </form>
+                    </div>
+
+                    <!-- Manage Testimonials Section -->
+                    <div class="bg-white p-8 rounded-2xl shadow-lg mb-12">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-6">Manage Testimonials</h2>
+                        <div id="admin-testimonials-list" class="space-y-4 mb-6 max-h-72 overflow-y-auto"></div>
+                        <h3 class="text-xl font-bold text-gray-800 mb-4 pt-6 border-t">Add New Testimonial</h3>
+                        <form id="add-testimonial-form" class="space-y-4">
+                            <input type="text" name="name" placeholder="Author's Name" class="p-3 border rounded-lg w-full" required />
+                            <textarea name="quote" placeholder="Testimonial Quote" class="p-3 border rounded-lg w-full h-24" required></textarea>
+                            <button type="submit" class="bg-pink-500 text-white font-semibold px-8 py-3 rounded-full w-full hover:bg-pink-600 disabled:bg-gray-400">Add Testimonial</button>
                         </form>
                     </div>
 
@@ -1515,6 +1567,9 @@
             // Add Contact Info Form Logic
             container.querySelector('#contact-info-form').addEventListener('submit', handleContactUpdate);
             
+            // Add Testimonial Form Logic
+            container.querySelector('#add-testimonial-form').addEventListener('submit', handleAddTestimonial);
+
             // Add Goal Form Logic
             container.querySelector('#add-goal-form').addEventListener('submit', handleAddGoal);
 
@@ -1613,6 +1668,7 @@
             loadAdminBannerForm();
             loadAdminImpactForm();
             loadAdminContactForm(); // Load new contact data
+            loadAdminTestimonialsList(); // Load new testimonials data
             loadAdminGoalsList();
             loadAdminDonorsList();
             loadAdminGalleryList();
@@ -1921,7 +1977,7 @@
                     timestamp: new Date()
                 });
                 
-                showThankYouModal(name, amount);
+                showThankYouModal(name, amount, goalId ? goalText : "General Support");
                 form.reset();
             } catch (error) {
                 console.error("Error adding pledge: ", error);
@@ -2007,6 +2063,77 @@
             } catch (error) {
                 showModal("Error updating contact info: " + error.message);
             }
+        };
+
+        const handleAddTestimonial = async (e) => {
+            e.preventDefault();
+            const form = e.target;
+            const button = form.querySelector('button');
+            button.disabled = true;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Adding...';
+
+            try {
+                const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+                const testimonialsCollectionPath = `/artifacts/${appId}/public/data/testimonials`;
+                
+                await addDoc(collection(db, testimonialsCollectionPath), {
+                    name: form.name.value,
+                    quote: form.quote.value,
+                    createdAt: new Date()
+                });
+                showModal('Testimonial added successfully!');
+                form.reset();
+            } catch (error) {
+                showModal('Error adding testimonial: ' + error.message);
+            } finally {
+                button.disabled = false;
+                button.textContent = 'Add Testimonial';
+            }
+        };
+
+        const loadAdminTestimonialsList = () => {
+            const container = document.getElementById('admin-testimonials-list');
+            if (!container) return;
+            container.innerHTML = `<p class="text-center text-gray-500">Loading testimonials...</p>`;
+
+            const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+            const testimonialsCollectionPath = `/artifacts/${appId}/public/data/testimonials`;
+            const q = query(collection(db, testimonialsCollectionPath), orderBy("createdAt", "desc"));
+
+            currentPageUnsubscribe = onSnapshot(q, (snapshot) => {
+                if (snapshot.empty) {
+                    container.innerHTML = `<p class="text-center text-gray-500">No testimonials yet.</p>`;
+                    return;
+                }
+                container.innerHTML = snapshot.docs.map(doc => {
+                    const testimonial = doc.data();
+                    const docId = doc.id;
+                    return `
+                        <div class="p-3 bg-gray-50 rounded-lg flex justify-between items-center">
+                            <div>
+                                <p class="font-semibold">${testimonial.name}</p>
+                                <p class="text-sm text-gray-600 italic">"${testimonial.quote.substring(0, 50)}..."</p>
+                            </div>
+                            <button data-id="${docId}" class="delete-testimonial-btn text-red-500 hover:text-red-700 font-semibold">Delete</button>
+                        </div>
+                    `;
+                }).join('');
+
+                document.querySelectorAll('.delete-testimonial-btn').forEach(button => {
+                    button.addEventListener('click', async (e) => {
+                        const docId = e.target.dataset.id;
+                        const confirmed = await showConfirmModal('Are you sure you want to delete this testimonial?');
+                        if (confirmed) {
+                            try {
+                                await deleteDoc(doc(db, testimonialsCollectionPath, docId));
+                                showModal('Testimonial deleted successfully.');
+                            } catch (error) {
+                                showModal('Error deleting testimonial: ' + error.message);
+                            }
+                        }
+                    });
+                });
+            });
         };
 
         const handleAddGoal = async (e) => {
@@ -2261,14 +2388,12 @@
             const noteContainer = document.getElementById('note-output');
             const loadingSpinner = document.getElementById('loading-spinner');
             const actionButtons = document.getElementById('note-actions');
-            const shareWhatsappBtn = document.getElementById('share-whatsapp-btn');
-            const shareTwitterBtn = document.getElementById('share-twitter-btn');
-
+            
             noteContainer.innerHTML = '';
             loadingSpinner.style.display = 'flex';
             actionButtons.style.display = 'none';
 
-            const prompt = `Generate a short, ${tone} thank you message for a donation to our charity, the Srian Foundation. The donor's name is ${name} and they pledged ₹${amount}. The message should focus on our ${focus} program. Keep it under 60 words and sign it from 'The Srian Foundation Team'.`;
+            const prompt = `Generate a short, ${tone} thank you message for a donation to our charity, the Srian Foundation. The donor's name is ${name} and they pledged ₹${amount}. The message should focus on our ${focus} program. Keep it under 60 words and sign it from 'The Srian Foundation Team'. Do not use exclamation marks.`;
 
             try {
                 // This will use the secure middleman when deployed on Vercel.
@@ -2289,9 +2414,6 @@
                 if (result.text) {
                     const text = result.text;
                     
-                    shareWhatsappBtn.href = `https://wa.me/?text=${encodeURIComponent(text)}`;
-                    shareTwitterBtn.href = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
-
                     let i = 0;
                     noteContainer.innerHTML = '';
                     const typeWriter = () => {
