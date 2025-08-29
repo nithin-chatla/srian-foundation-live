@@ -559,13 +559,17 @@
             const contactSnap = await getDoc(contactRef);
             const contactData = contactSnap.exists() ? contactSnap.data() : {};
 
-            let contactHTML = '';
-            if (contactData.phone) contactHTML += `<a href="tel:${contactData.phone}" class="text-amber-700 hover:text-amber-900"><i class="fas fa-phone"></i></a>`;
-            if (contactData.email) contactHTML += `<a href="mailto:${contactData.email}" class="text-amber-700 hover:text-amber-900"><i class="fas fa-envelope"></i></a>`;
-            if (contactData.instagram) contactHTML += `<a href="${contactData.instagram}" target="_blank" class="text-amber-700 hover:text-amber-900"><i class="fab fa-instagram"></i></a>`;
-            if (contactData.facebook) contactHTML += `<a href="${contactData.facebook}" target="_blank" class="text-amber-700 hover:text-amber-900"><i class="fab fa-facebook-f"></i></a>`;
-            if (contactData.twitter) contactHTML += `<a href="${contactData.twitter}" target="_blank" class="text-amber-700 hover:text-amber-900"><i class="fab fa-twitter"></i></a>`;
-
+            let contactDetailsHTML = '<div class="flex flex-col items-center justify-center space-y-1 text-xs text-amber-800">';
+            if (contactData.address) contactDetailsHTML += `<div class="flex items-center gap-2"><i class="fas fa-map-marker-alt fa-fw"></i><span>${contactData.address}</span></div>`;
+            if (contactData.phone) contactDetailsHTML += `<div class="flex items-center gap-2"><i class="fas fa-phone fa-fw"></i><a href="tel:${contactData.phone}" class="hover:underline">${contactData.phone}</a></div>`;
+            if (contactData.email) contactDetailsHTML += `<div class="flex items-center gap-2"><i class="fas fa-envelope fa-fw"></i><a href="mailto:${contactData.email}" class="hover:underline">${contactData.email}</a></div>`;
+            contactDetailsHTML += '</div>';
+            
+            let socialIconsHTML = '<div class="flex justify-center items-center space-x-4 text-lg mt-2">';
+            if (contactData.instagram) socialIconsHTML += `<a href="${contactData.instagram}" target="_blank" class="text-amber-700 hover:text-amber-900"><i class="fab fa-instagram"></i></a>`;
+            if (contactData.facebook) socialIconsHTML += `<a href="${contactData.facebook}" target="_blank" class="text-amber-700 hover:text-amber-900"><i class="fab fa-facebook-f"></i></a>`;
+            if (contactData.twitter) socialIconsHTML += `<a href="${contactData.twitter}" target="_blank" class="text-amber-700 hover:text-amber-900"><i class="fab fa-twitter"></i></a>`;
+            socialIconsHTML += '</div>';
 
             thankYouModalContent.innerHTML = `
                 <h2 class="text-2xl font-bold text-[var(--text-primary)] mb-2">Thank You, ${name}!</h2>
@@ -594,20 +598,14 @@
                     ✨ Generate My Note
                 </button>
 
-                <!-- UPDATED: Redesigned note card for a beautiful, branded look -->
                 <div id="note-card" class="relative overflow-hidden text-left p-6 rounded-lg min-h-[300px] bg-amber-50 border-2 border-amber-200 shadow-lg flex flex-col">
-                    <!-- Watermark Logo -->
                     <div class="absolute inset-0 flex justify-center items-center z-0">
                         <img src="${document.getElementById('website-logo').src}" alt="Logo Watermark" class="h-40 w-40 opacity-5">
                     </div>
-
-                    <!-- Floral Decorations -->
                     <div class="absolute top-1 left-1 w-16 h-16 text-amber-100 -z-0"><svg viewBox="0 0 100 100"><path d="M 10 10 C 20 40, 40 20, 50 10 L 10 50 C 20 40, 40 20, 10 10" fill="currentColor"></path></svg></div>
                     <div class="absolute bottom-1 right-1 w-16 h-16 text-amber-100 -z-0 transform rotate-180"><svg viewBox="0 0 100 100"><path d="M 10 10 C 20 40, 40 20, 50 10 L 10 50 C 20 40, 40 20, 10 10" fill="currentColor"></path></svg></div>
                     
-                    <!-- Content Wrapper -->
                     <div class="relative z-10 flex flex-col flex-grow">
-                        <!-- Header with Indian SVG and Logo -->
                         <div class="text-center mb-4">
                             <svg width="100%" height="25" viewBox="0 0 200 20" preserveAspectRatio="none" class="text-amber-400 mb-2">
                               <path d="M0,10 Q25,0 50,10 T100,10 T150,10 T200,10" stroke="currentColor" stroke-width="1.5" fill="none"/>
@@ -623,20 +621,15 @@
                             </div>
                         </div>
                         
-                        <!-- Generated Text -->
                         <div class="flex-grow">
                             <p id="note-output" class="text-gray-700 whitespace-pre-wrap text-base leading-relaxed text-center font-serif italic min-h-[100px]"></p>
                         </div>
                         
-                        <!-- NEW: Contact Info Footer -->
                         <div class="mt-auto pt-4 border-t border-amber-200 text-center">
-                            <p class="text-xs text-amber-800 font-semibold mb-2">Connect With Us</p>
-                            <div class="flex justify-center items-center space-x-4 text-lg">
-                                ${contactHTML}
-                            </div>
+                            ${contactDetailsHTML}
+                            ${socialIconsHTML}
                         </div>
                     </div>
-                     <!-- Loading Spinner -->
                     <div id="loading-spinner" class="absolute inset-0 flex justify-center items-center bg-amber-50/80" style="display: none;"><div class="spinner"></div></div>
                 </div>
 
@@ -1397,6 +1390,7 @@
                     <div class="bg-white p-8 rounded-2xl shadow-lg mb-12">
                         <h2 class="text-2xl font-bold text-gray-800 mb-6">Manage Contact Information</h2>
                         <form id="contact-info-form" class="space-y-4">
+                            <textarea name="address" placeholder="Full Address" class="p-3 border rounded-lg w-full h-24"></textarea>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <input type="text" name="phone" placeholder="Phone Number (e.g., +91...)" class="p-3 border rounded-lg w-full" />
                                 <input type="email" name="email" placeholder="Contact Email" class="p-3 border rounded-lg w-full" />
@@ -1881,6 +1875,7 @@
             const contactSnap = await getDoc(contactRef);
             if (contactSnap.exists()) {
                 const data = contactSnap.data();
+                form.address.value = data.address || '';
                 form.phone.value = data.phone || '';
                 form.email.value = data.email || '';
                 form.instagram.value = data.instagram || '';
@@ -1999,6 +1994,7 @@
             e.preventDefault();
             const form = e.target;
             const contactData = {
+                address: form.address.value,
                 phone: form.phone.value,
                 email: form.email.value,
                 instagram: form.instagram.value,
@@ -2276,7 +2272,6 @@
 
             try {
                 // This will use the secure middleman when deployed on Vercel.
-                // In the local canvas environment, it might not work if not configured.
                 const apiUrl = `/api/generate-note`; 
                 
                 const response = await fetch(apiUrl, {
@@ -2314,8 +2309,8 @@
                     throw new Error("No content generated.");
                 }
             } catch (error) {
-                console.error('Gemini API Error:', error);
-                noteContainer.textContent = "Sorry, we couldn't generate a message at this time. But please know we are incredibly grateful for your support! (This feature requires online deployment to work).";
+                console.error('API Error:', error);
+                noteContainer.textContent = "Sorry, we couldn't generate a message at this time. But please know we are incredibly grateful for your support! (This feature requires online deployment to work correctly).";
                 actionButtons.style.display = 'flex';
             } finally {
                 loadingSpinner.style.display = 'none';
