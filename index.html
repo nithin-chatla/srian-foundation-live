@@ -2683,50 +2683,72 @@
             const paymentDetailsSnap = await getDoc(paymentDetailsRef);
             const paymentData = paymentDetailsSnap.exists() ? paymentDetailsSnap.data() : { upiId: 'myupiid@upi' };
 
+            const paymentSectionHTML = `
+                <div class="mb-8">
+                     <h3 class="text-xl font-bold text-center text-[var(--text-primary)] mb-4">How to Pay & Confirm</h3>
+                     <div class="bg-white border-l-4 border-red-500 text-red-800 p-4 rounded-r-lg" role="alert">
+                        <ol class="list-decimal list-inside space-y-2 font-medium text-sm">
+                            <li>Open your UPI app (Google Pay, PhonePe, Paytm, etc.).</li>
+                            <li>Scan the QR code or click the "Pay Now" button.</li>
+                            <li>Enter the exact amount you wish to donate.</li>
+                            <li>Complete the payment securely in your app.</li>
+                            <li>Take a screenshot of the payment receipt.</li>
+                            <li>Fill out this Confirmation Form and upload the screenshot.</li>
+                        </ol>
+                     </div>
+                </div>`;
+
+            const upiDetailsHTML = lastPledgeData ? `
+                <div class="text-center lg:text-left">
+                    <div class="section-title text-center">
+                        <h2 class="text-3xl md:text-4xl font-bold text-[var(--text-primary)]">Complete Your Donation</h2>
+                        <p class="mt-4 text-lg text-[var(--text-secondary)]">Use the QR code or link below to pay with any UPI app.</p>
+                    </div>
+                    <div class="mt-8 flex flex-col items-center">
+                        <div class="mb-4 w-full max-w-sm">
+                            <label for="payment-amount" class="block text-sm font-medium text-[var(--text-secondary)] mb-1">1. Amount to Pay (INR)</label>
+                            <input type="number" id="payment-amount" placeholder="Enter amount" value="${lastPledgeData?.amount || ''}" class="p-3 border rounded-lg w-full text-lg text-center font-semibold text-[var(--text-primary)] transition" />
+                        </div>
+                        <div id="payment-qrcode" class="w-64 h-64 rounded-xl shadow-lg border-4 border-white bg-gray-100 flex items-center justify-center p-2">
+                             <p class="text-sm text-gray-500">Enter an amount to generate QR code</p>
+                        </div>
+                        <p class="mt-4 text-[var(--text-secondary)] font-mono text-sm">${paymentData.upiId}</p>
+                        <a id="upi-payment-link" href="#" class="mt-4 bg-gray-400 text-white font-semibold px-8 py-3 rounded-full transition-all inline-block pointer-events-none">
+                            Pay with UPI <i class="fas fa-external-link-alt ml-2"></i>
+                        </a>
+                    </div>
+                </div>
+            ` : '';
+            
             container.innerHTML = `
                 <div class="container mx-auto px-4">
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
-                        <!-- UPI Details -->
-                        <div class="text-center lg:text-left">
-                            <div class="section-title text-center">
-                                <h2 class="text-3xl md:text-4xl font-bold text-[var(--text-primary)]">Complete Your Donation</h2>
-                                <p class="mt-4 text-lg text-[var(--text-secondary)]">Enter an amount and use the QR code or link to pay with any UPI app.</p>
-                            </div>
-                            <div class="mt-8 flex flex-col items-center">
-                                <div class="mb-4 w-full max-w-sm">
-                                    <label for="payment-amount" class="block text-sm font-medium text-[var(--text-secondary)] mb-1">Amount (INR)</label>
-                                    <input type="number" id="payment-amount" placeholder="Enter amount" value="${lastPledgeData?.amount || ''}" class="p-3 border rounded-lg w-full text-lg text-center font-semibold text-[var(--text-primary)] transition" />
-                                </div>
-                                <div id="payment-qrcode" class="w-64 h-64 rounded-xl shadow-lg border-4 border-white bg-gray-100 flex items-center justify-center">
-                                     <p class="text-sm text-gray-500">Enter an amount to generate QR</p>
-                                </div>
-                                <p class="mt-4 text-[var(--text-secondary)] font-mono text-sm">${paymentData.upiId}</p>
-                                <a id="upi-payment-link" href="#" class="mt-4 bg-gray-400 text-white font-semibold px-8 py-3 rounded-full transition-all inline-block pointer-events-none">
-                                    Pay with UPI <i class="fas fa-external-link-alt ml-2"></i>
-                                </a>
-                            </div>
-                        </div>
-
+                     <div class="grid grid-cols-1 ${lastPledgeData ? 'lg:grid-cols-2' : 'lg:grid-cols-1'} gap-12 items-start">
+                        ${upiDetailsHTML}
                         <!-- Confirmation Form -->
-                        <div class="bg-[var(--background-alt)] p-8 rounded-2xl shadow-lg">
-                            <h3 class="text-2xl font-bold text-center text-[var(--text-primary)] mb-6">Confirm Your Payment</h3>
+                        <div class="bg-[var(--background-alt)] p-8 rounded-2xl shadow-lg ${!lastPledgeData ? 'max-w-2xl mx-auto w-full' : ''}">
+                             ${paymentSectionHTML}
+                            <h3 class="text-2xl font-bold text-center text-[var(--text-primary)] mb-6 pt-6 border-t">Submit Your Confirmation</h3>
                             <form id="payment-confirmation-form" class="space-y-6">
                                 <div>
                                     <label for="conf-name" class="block text-left text-sm font-medium text-[var(--text-secondary)] mb-1">Your Name</label>
-                                    <input type="text" id="conf-name" name="name" value="${lastPledgeData?.name || ''}" class="p-3 border rounded-lg w-full transition bg-[var(--background-card)] text-[var(--text-primary)]" required />
+                                    <input type="text" id="conf-name" name="name" value="${lastPledgeData?.name || ''}" class="p-3 border rounded-lg w-full transition bg-white text-[var(--text-primary)]" required />
                                 </div>
                                 <div>
                                     <label for="conf-email" class="block text-left text-sm font-medium text-[var(--text-secondary)] mb-1">Your Email</label>
-                                    <input type="email" id="conf-email" name="email" value="${lastPledgeData?.email || ''}" class="p-3 border rounded-lg w-full transition bg-[var(--background-card)] text-[var(--text-primary)]" required />
+                                    <input type="email" id="conf-email" name="email" value="${lastPledgeData?.email || ''}" class="p-3 border rounded-lg w-full transition bg-white text-[var(--text-primary)]" required />
                                 </div>
                                 <div>
                                     <label for="utr" class="block text-left text-sm font-medium text-[var(--text-secondary)] mb-1">UTR / Transaction ID</label>
-                                    <input type="text" name="utr" id="utr" placeholder="Enter the 12-digit transaction ID" class="p-3 border rounded-lg w-full transition bg-[var(--background-card)] text-[var(--text-primary)]" required />
+                                    <input type="text" name="utr" id="utr" placeholder="Enter the 12-digit transaction ID" class="p-3 border rounded-lg w-full transition bg-white text-[var(--text-primary)]" required />
                                 </div>
                                 <div>
                                     <label for="screenshot" class="block text-left text-sm font-medium text-[var(--text-secondary)] mb-1">Upload Screenshot</label>
                                     <input type="file" name="screenshot" id="screenshot" accept="image/*" class="p-2 border rounded-lg w-full file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" required />
                                 </div>
+                                 ${!lastPledgeData ? `<div>
+                                    <label for="conf-amount" class="block text-left text-sm font-medium text-[var(--text-secondary)] mb-1">Amount Donated (INR)</label>
+                                    <input type="number" id="conf-amount" name="amount" placeholder="Enter amount donated" class="p-3 border rounded-lg w-full transition bg-white text-[var(--text-primary)]" required />
+                                </div>` : ''}
                                 <div class="text-center pt-4">
                                     <button type="submit" class="bg-[var(--primary)] text-white text-lg font-semibold px-10 py-4 rounded-full shadow-lg w-full hover:opacity-90 transition-colors disabled:bg-gray-400">
                                         Submit Confirmation
@@ -2738,48 +2760,32 @@
                 </div>
             `;
             
-            const amountInput = container.querySelector('#payment-amount');
-            const upiId = paymentData.upiId || 'myupiid@upi';
+            if (lastPledgeData) {
+                const amountInput = container.querySelector('#payment-amount');
+                const upiId = paymentData.upiId || 'myupiid@upi';
 
-            const updatePaymentDetails = (amount) => {
-                const qrContainer = document.getElementById('payment-qrcode');
-                const paymentLink = document.getElementById('upi-payment-link');
-                
-                qrContainer.innerHTML = ''; // Clear previous QR
-                
-                if (amount && amount > 0) {
-                    const upiString = `upi://pay?pa=${upiId}&pn=Srian%20Foundation&am=${amount}&cu=INR`;
-                    new QRCode(qrContainer, {
-                        text: upiString,
-                        width: 240,
-                        height: 240,
-                        colorDark: "#000000",
-                        colorLight: "#ffffff",
-                        correctLevel: QRCode.CorrectLevel.H
-                    });
-                    paymentLink.href = upiString;
-                    paymentLink.classList.remove('bg-gray-400', 'pointer-events-none');
-                    paymentLink.classList.add('bg-[var(--accent)]');
-                    paymentLink.innerHTML = `Pay ₹${amount.toLocaleString('en-IN')} with UPI <i class="fas fa-external-link-alt ml-2"></i>`;
-                } else {
-                    qrContainer.innerHTML = `<p class="text-sm text-gray-500">Enter a valid amount to generate QR</p>`;
-                    paymentLink.href = '#';
-                    paymentLink.classList.add('bg-gray-400', 'pointer-events-none');
-                    paymentLink.classList.remove('bg-[var(--accent)]');
-                    paymentLink.innerHTML = `Pay with UPI <i class="fas fa-external-link-alt ml-2"></i>`;
-                }
-            };
-            
-            amountInput.addEventListener('input', (e) => {
-                const amount = e.target.value;
-                updatePaymentDetails(amount);
-            });
-
-            // Initial generation if amount is pre-filled
-            if(amountInput.value) {
-                updatePaymentDetails(amountInput.value);
+                const updatePaymentDetails = (amount) => {
+                    const qrContainer = document.getElementById('payment-qrcode');
+                    const paymentLink = document.getElementById('upi-payment-link');
+                    qrContainer.innerHTML = '';
+                    if (amount && amount > 0) {
+                        const upiString = `upi://pay?pa=${upiId}&pn=Srian%20Foundation&am=${amount}&cu=INR`;
+                        new QRCode(qrContainer, { text: upiString, width: 240, height: 240, colorDark: "#000000", colorLight: "#ffffff", correctLevel: QRCode.CorrectLevel.H });
+                        paymentLink.href = upiString;
+                        paymentLink.classList.remove('bg-gray-400', 'pointer-events-none');
+                        paymentLink.classList.add('bg-[var(--accent)]');
+                        paymentLink.innerHTML = `Pay ₹${amount.toLocaleString('en-IN')} with UPI <i class="fas fa-external-link-alt ml-2"></i>`;
+                    } else {
+                        qrContainer.innerHTML = `<p class="text-sm text-gray-500">Enter a valid amount to generate QR code</p>`;
+                        paymentLink.href = '#';
+                        paymentLink.classList.add('bg-gray-400', 'pointer-events-none');
+                        paymentLink.classList.remove('bg-[var(--accent)]');
+                        paymentLink.innerHTML = `Pay with UPI <i class="fas fa-external-link-alt ml-2"></i>`;
+                    }
+                };
+                amountInput.addEventListener('input', (e) => updatePaymentDetails(e.target.value));
+                if(amountInput.value) updatePaymentDetails(amountInput.value);
             }
-
             container.querySelector('#payment-confirmation-form').addEventListener('submit', handlePaymentConfirmationSubmit);
         };
 
@@ -2788,14 +2794,14 @@
             const form = e.target;
             const button = form.querySelector('button[type="submit"]');
             const file = form.screenshot.files[0];
-            const amount = document.getElementById('payment-amount').value;
+            const amount = lastPledgeData ? document.getElementById('payment-amount').value : form.amount.value;
     
             if (!file) {
                 showModal("Please upload a payment screenshot.");
                 return;
             }
             if (!amount || amount <= 0) {
-                 showModal("Please enter a valid amount in the payment section.");
+                 showModal("Please enter the amount you donated.");
                 return;
             }
     
@@ -2818,7 +2824,6 @@
     
                 showModal('Confirmation submitted!', '<p class="text-base">Thank you! Our team will verify your payment shortly and update your status on the donor wall.</p>');
                 form.reset();
-                document.getElementById('payment-amount').value = '';
                 const paymentSection = document.getElementById('payment-section');
                 if (paymentSection) {
                     paymentSection.style.display = 'none';
