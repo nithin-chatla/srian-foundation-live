@@ -1214,19 +1214,22 @@
         // --- Page Render Functions ---
         const pages = {
             home: async () => {
+                const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
                 const template = document.getElementById('template-home');
                 const content = template.content.cloneNode(true);
-
-                // Fetch dynamic content
-                const contentRef = doc(db, "settings", "content");
-                const contentSnap = await getDoc(contentRef);
-
+            
+                // Fetch dynamic content AND images
+                const contentRef = doc(db, `/artifacts/${appId}/public/data/settings`, "content");
+                const imagesRef = doc(db, `/artifacts/${appId}/public/data/settings`, "siteImages");
+            
+                const [contentSnap, imagesSnap] = await Promise.all([getDoc(contentRef), getDoc(imagesRef)]);
+            
                 if (contentSnap.exists()) {
                     const data = contentSnap.data();
                     // Populate Hero
                     if (data.heroTitle) content.querySelector('.hero-title').textContent = data.heroTitle;
                     if (data.heroSubtitle) content.querySelector('.hero-p').textContent = data.heroSubtitle;
-
+            
                     // Populate Mission Section
                     if (data.missionTitle) content.querySelector('.mission-title').textContent = data.missionTitle;
                     if (data.missionSubtitle) content.querySelector('.mission-subtitle').textContent = data.missionSubtitle;
@@ -1235,10 +1238,19 @@
                     if (data.pillar2Title) content.querySelector('.pillar2-title').textContent = data.pillar2Title;
                     if (data.pillar2Text) content.querySelector('.pillar2-text').textContent = data.pillar2Text;
                 }
-
+                
+                // NEW: Check for and apply the hero image
+                if (imagesSnap.exists()) {
+                    const imageData = imagesSnap.data();
+                    if (imageData.heroImageUrl) {
+                        const heroImg = content.querySelector('#hero-image');
+                        if (heroImg) heroImg.src = imageData.heroImageUrl;
+                    }
+                }
+            
                 mainContent.innerHTML = '';
                 mainContent.appendChild(content);
-
+            
                 // Render other components in parallel for speed
                 await Promise.all([
                     renderBanner(mainContent.querySelector('#banner-section')),
@@ -1262,7 +1274,7 @@
                         }
                     });
                 }
-
+            
                 mainContent.querySelectorAll('.nav-link, .nav-item').forEach(link => link.addEventListener('click', handleNavClick));
             },
             goals: () => {
@@ -1472,10 +1484,22 @@
                     runPageAnimations('gallery');
                 });
             },
-            about: () => {
+            about: async () => {
                 const template = document.getElementById('template-about');
                 mainContent.innerHTML = '';
                 mainContent.appendChild(template.content.cloneNode(true));
+                
+                // NEW: Fetch and apply the about image
+                const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+                const imagesRef = doc(db, `/artifacts/${appId}/public/data/settings`, "siteImages");
+                const imagesSnap = await getDoc(imagesRef);
+                if (imagesSnap.exists()) {
+                    const imageData = imagesSnap.data();
+                    if (imageData.aboutImageUrl) {
+                        const aboutImg = mainContent.querySelector('#about-image');
+                        if(aboutImg) aboutImg.src = imageData.aboutImageUrl;
+                    }
+                }
             },
             contact: () => {
                 const template = document.getElementById('template-contact');
@@ -1671,6 +1695,30 @@
                             </div>
                             <button type="submit" class="bg-orange-500 text-white font-semibold px-8 py-3 rounded-full w-full hover:bg-orange-600">Save Contact Details</button>
                         </form>
+                    </div>
+                     <!-- Manage Website Images -->
+                    <div class="bg-white p-8 rounded-2xl shadow-lg mb-12">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-6">Manage Website Images</h2>
+                        <div class="space-y-6">
+                            <!-- Hero Image Form -->
+                            <form id="hero-image-form" class="space-y-2 pb-6 border-b">
+                                <label class="font-semibold">Homepage Hero Image</label>
+                                <div class="flex items-center gap-4">
+                                    <img id="hero-image-preview" src="[https://placehold.co/96x64/eee/ccc?text=Hero](https://placehold.co/96x64/eee/ccc?text=Hero)" alt="Hero preview" class="w-24 h-16 object-cover rounded-lg bg-gray-100"/>
+                                    <input type="file" name="imageFile" accept="image/*" class="p-2 border rounded-lg w-full file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" required />
+                                    <button type="submit" class="bg-blue-600 text-white font-semibold px-6 py-2 rounded-full hover:bg-blue-700">Update</button>
+                                </div>
+                            </form>
+                            <!-- About Us Image Form -->
+                            <form id="about-image-form" class="space-y-2">
+                                <label class="font-semibold">About Us Image</label>
+                                <div class="flex items-center gap-4">
+                                    <img id="about-image-preview" src="[https://placehold.co/96x64/eee/ccc?text=About](https://placehold.co/96x64/eee/ccc?text=About)" alt="About preview" class="w-24 h-16 object-cover rounded-lg bg-gray-100"/>
+                                    <input type="file" name="imageFile" accept="image/*" class="p-2 border rounded-lg w-full file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" required />
+                                    <button type="submit" class="bg-blue-600 text-white font-semibold px-6 py-2 rounded-full hover:bg-blue-700">Update</button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
 
                     <!-- Manage Testimonials Section -->
@@ -1923,6 +1971,15 @@
             
             // NEW: Add Payment Details Form Logic
             container.querySelector('#payment-details-form').addEventListener('submit', handlePaymentDetailsUpdate);
+        // NEW: Add Website Image Form Logic
+            container.querySelector('#hero-image-form').addEventListener('submit', (e) => handleWebsiteImageUpdate(e, 'heroImageUrl'));
+            container.querySelector('#about-image-form').addEventListener('submit', (e) => handleWebsiteImageUpdate(e, 'aboutImageUrl'));
+
+            // ... (keep the other event listeners here) ...
+
+            // Load initial data for the dashboard
+            loadAdminImageManager(); // <-- ADD THIS LINE
+            // ... (keep the other load functions here) ...
 
             // Load initial data for the dashboard
             loadAdminBannerForm();
@@ -2298,6 +2355,53 @@
                 form.reset();
             }
         };
+         const handleWebsiteImageUpdate = async (e, imageKey) => {
+            e.preventDefault();
+            const form = e.target;
+            const button = form.querySelector('button[type="submit"]');
+            const file = form.imageFile.files[0];
+            if (!file) return showModal("Please select a file to upload.");
+
+            button.disabled = true;
+            button.innerHTML = '<div class="spinner mx-auto"></div>';
+
+            try {
+                const imageUrl = await uploadImageCloudinary(file);
+                const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+                const siteImagesRef = doc(db, `/artifacts/${appId}/public/data/settings`, "siteImages");
+                
+                const updatePayload = {};
+                updatePayload[imageKey] = imageUrl;
+
+                await setDoc(siteImagesRef, updatePayload, { merge: true });
+                showModal("Website image updated successfully!");
+            } catch (error) {
+                showModal("Error updating image: Could not connect to the server. Please check console for details.");
+                console.error("Image Update Error:", error);
+            } finally {
+                button.disabled = false;
+                button.textContent = "Update";
+                form.reset();
+            }
+        };
+
+        const loadAdminImageManager = async () => {
+            const heroPreview = document.getElementById('hero-image-preview');
+            const aboutPreview = document.getElementById('about-image-preview');
+            if (!heroPreview || !aboutPreview) return;
+        
+            const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+            const siteImagesRef = doc(db, `/artifacts/${appId}/public/data/settings`, "siteImages");
+            
+            onSnapshot(siteImagesRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    heroPreview.src = data.heroImageUrl || '[https://placehold.co/96x64/eee/ccc?text=Hero](https://placehold.co/96x64/eee/ccc?text=Hero)';
+                    aboutPreview.src = data.aboutImageUrl || '[https://placehold.co/96x64/eee/ccc?text=About](https://placehold.co/96x64/eee/ccc?text=About)';
+                }
+            });
+        };
+
         // ========== Handle Create Page ==========
 const createPageForm = document.getElementById('create-page-form');
 const adminPagesList = document.getElementById('admin-created-pages-list');
@@ -3451,4 +3555,3 @@ async function tryRenderDynamicPage(slug) {
     </script>
 </body>
 </html>
-
