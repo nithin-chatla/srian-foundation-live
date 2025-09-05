@@ -6,10 +6,10 @@
     <title>Srian Foundation - Professional Donation Website</title>
     
     <!-- Favicon -->
-    <link rel="icon" type="image/png" sizes="32x32" href="https://ik.imagekit.io/gmxabb1dm/srian-logo.png?updatedAt=1753800313508">
+    <!-- <link rel="icon" type="image/png" sizes="32x32" href="https://ik.imagekit.io/gmxabb1dm/srian-logo.png?updatedAt=1753800313508">
     <link rel="icon" type="image/png" sizes="16x16" href="https://ik.imagekit.io/gmxabb1dm/srian-logo.png?updatedAt=1753800313508">
     <link rel="apple-touch-icon" sizes="180x180" href="https://ik.imagekit.io/gmxabb1dm/srian-logo.png?updatedAt=1753800313508">
-    <link rel="shortcut icon" href="https://ik.imagekit.io/gmxabb1dm/srian-logo.png?updatedAt=1753800313508">
+    <link rel="shortcut icon" href="https://ik.imagekit.io/gmxabb1dm/srian-logo.png?updatedAt=1753800313508"> -->
 
 
     <!-- Tailwind CSS & Fonts -->
@@ -34,7 +34,7 @@
 
     <style>
         :root {
-            --background-main: #fdfcfa;
+            --background-main: #ffffff;
             --background-alt: #f8fafc; /* gray-50 */
             --background-card: #ffffff;
             --text-primary: #1f2937;    /* gray-800 */
@@ -220,7 +220,8 @@
                     <img id="website-logo" src="https://ik.imagekit.io/gmxabb1dm/srian-logo.png?updatedAt=1753800313508" alt="Srian Foundation Logo" class="h-10 w-10 rounded-full">
                     <span class="text-[var(--text-primary)]">Srian Foundation</span>
                 </a>
-                <nav class="hidden md:flex space-x-6 items-center text-[var(--text-secondary)]">
+                <nav id="primary-nav" class="hidden md:flex space-x-6 items-center text-[var(--text-secondary)]">
+
                     <a href="#" data-page="home" class="nav-item hover:text-[var(--primary)] transition-colors">Home</a>
                     <a href="#" data-page="goals" class="nav-item hover:text-[var(--primary)] transition-colors">Goals</a>
                     <a href="#" data-page="donors" class="nav-item hover:text-[var(--primary)] transition-colors">Our Donors</a>
@@ -1596,7 +1597,66 @@
                             <button type="submit" class="bg-indigo-600 text-white font-semibold px-8 py-3 rounded-full w-full hover:bg-indigo-700 disabled:bg-gray-400">Upload New Logo</button>
                         </form>
                     </div>
-                    
+                    <!-- Create Page - Admin -->
+                    <div class="bg-white p-8 rounded-2xl shadow-lg mb-12" id="admin-create-page-block">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6">Create New Page</h2>
+
+                    <form id="create-page-form" class="space-y-4">
+                        <div>
+                        <label class="text-sm">Page Title</label>
+                        <input name="title" type="text" required class="p-2 border rounded-lg w-full" placeholder="My New Page"/>
+                        </div>
+
+                        <div>
+                        <label class="text-sm">URL Slug (unique)</label>
+                        <input name="slug" type="text" required class="p-2 border rounded-lg w-full" placeholder="my-new-page"/>
+                        </div>
+
+                        <div>
+                        <label class="text-sm">Short Description</label>
+                        <input name="description" type="text" class="p-2 border rounded-lg w-full" placeholder="Short subtitle"/>
+                        </div>
+
+                        <div>
+                        <label class="text-sm">Optional HTML content</label>
+                        <textarea name="contentHtml" rows="6" class="p-2 border rounded-lg w-full" placeholder="You can add formatted HTML"></textarea>
+                        </div>
+
+                        <div>
+                        <label class="text-sm">Upload images (optional)</label>
+                        <input name="images" type="file" accept="image/*" multiple class="p-2 border rounded-lg w-full" />
+                        </div>
+
+                        <div class="flex items-center gap-4">
+                        <label class="flex items-center gap-2">
+                            <input type="checkbox" name="navVisible" /> Add to site nav
+                        </label>
+                        <input name="navLabel" type="text" class="p-2 border rounded-lg" placeholder="Nav label"/>
+                        <input name="navOrder" type="number" class="p-2 border rounded-lg w-28" placeholder="order" />
+                        </div>
+
+                        <button type="submit" class="bg-[var(--primary)] text-white px-6 py-2 rounded-full font-semibold">Create Page</button>
+                    </form>
+
+                    <div id="admin-created-pages-list" class="mt-6 text-sm text-gray-600"></div>
+                    </div>
+
+                    <!-- Manage Favicon Section -->
+                        <div class="bg-white p-8 rounded-2xl shadow-lg mb-12">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-6">Favicon Manager</h2>
+                        <form id="favicon-form" class="space-y-4">
+                            <input type="file" name="faviconFile" accept="image/*" class="p-2 border rounded-lg w-full" required />
+                            <button type="submit" class="bg-indigo-600 text-white font-semibold px-8 py-3 rounded-full w-full hover:bg-indigo-700">
+                            Upload New Favicon
+                            </button>
+                        </form>
+
+                        <div class="mt-4 flex items-center gap-4">
+                            <img id="current-favicon" src="" alt="Current favicon preview" class="w-12 h-12 rounded-full border" />
+                            <div class="text-sm text-gray-600">Current favicon preview</div>
+                        </div>
+                        </div>
+
                     <!-- Manage Contact Info -->
                     <div class="bg-white p-8 rounded-2xl shadow-lg mb-12">
                         <h2 class="text-2xl font-bold text-gray-800 mb-6">Manage Contact Information</h2>
@@ -1754,6 +1814,13 @@
             // Add Logo Form Logic
             container.querySelector('#logo-form').addEventListener('submit', handleLogoUpload);
 
+            container.querySelector('#create-page-form').addEventListener('submit', handleCreatePageSubmit);
+
+
+            // Add Favicon Form Logic
+            container.querySelector('#favicon-form').addEventListener('submit', handleFaviconUpload);
+
+
             // Add Contact Info Form Logic
             container.querySelector('#contact-info-form').addEventListener('submit', handleContactUpdate);
             
@@ -1859,6 +1926,7 @@
 
             // Load initial data for the dashboard
             loadAdminBannerForm();
+            loadFaviconManager();
             loadAdminImpactForm();
             loadAdminContactForm(); 
             loadAdminTestimonialsList();
@@ -1869,6 +1937,8 @@
             loadAdminContentForm();
             loadAdminPaymentDetailsForm(); // NEW
             loadAdminConfirmationsList(); // NEW
+            loadAdminPagesList();
+
         };
 
         const loadAdminDonorsList = () => {
@@ -2228,6 +2298,161 @@
                 form.reset();
             }
         };
+        // ========== Handle Create Page ==========
+const createPageForm = document.getElementById('create-page-form');
+const adminPagesList = document.getElementById('admin-created-pages-list');
+
+const pagesCollectionPath = () => {
+  const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+  return `/artifacts/${appId}/public/data/pages`;
+};
+
+async function handleCreatePageSubmit(e) {
+  e.preventDefault();
+  const form = e.target;
+  const title = form.title.value.trim();
+  const slug = form.slug.value.trim();
+  const description = form.description.value.trim();
+  const contentHtml = form.contentHtml.value || '';
+  const navVisible = !!form.navVisible.checked;
+  const navLabel = (form.navLabel.value || title).trim();
+  const navOrder = Number(form.navOrder.value) || 0;
+
+  if (!title || !slug) return showModal('Please provide Title and Slug.');
+
+  // upload images if selected
+  const files = Array.from(form.images.files || []);
+  let imageUrls = [];
+  for (const file of files) {
+    const url = await uploadImageCloudinary(file);
+    imageUrls.push(url);
+  }
+
+  const payload = {
+    title, slug, description, contentHtml,
+    images: imageUrls,
+    navVisible, navLabel, navOrder,
+    createdAt: Date.now(),
+    updatedAt: Date.now()
+  };
+
+  await addDoc(collection(db, pagesCollectionPath()), payload);
+  showModal('Page created successfully!');
+  form.reset();
+  loadAdminPagesList();
+}
+
+async function loadAdminPagesList() {
+  if (!adminPagesList) return;
+  const q = query(collection(db, pagesCollectionPath()), orderBy('createdAt', 'desc'));
+  const snapshot = await getDocs(q);
+  if (snapshot.empty) {
+    adminPagesList.innerHTML = '<em>No pages created yet.</em>';
+    return;
+  }
+  adminPagesList.innerHTML = snapshot.docs.map(d => {
+    const p = d.data();
+    return `<div class="p-2 border-b">
+      <strong>${p.title}</strong> — <small>${p.slug}</small>
+      <div class="text-xs text-gray-500 mt-1">${p.description || ''}</div>
+    </div>`;
+  }).join('');
+}
+
+        // Upload handler for favicon (reuses uploadImageCloudinary)
+const handleFaviconUpload = async (e) => {
+  e.preventDefault();
+  const form = e.target;
+  const button = form.querySelector('button');
+  const file = form.faviconFile.files[0];
+  if (!file) {
+    showModal("Please select a file to upload.");
+    return;
+  }
+
+  button.disabled = true;
+  button.innerHTML = '<div class="spinner mx-auto"></div>';
+
+  try {
+    // uploadImageCloudinary is already in your file and returns an optimized URL
+    const imageUrl = await uploadImageCloudinary(file);
+
+    // Save URL to Firestore
+    await setDoc(doc(db, "settings", "favicon"), { url: imageUrl });
+
+    // Update admin preview
+    const img = document.getElementById('current-favicon');
+    if (img) img.src = imageUrl;
+
+    // Update any existing <link rel="icon"> tags in head (so site updates instantly)
+    const existingIcons = document.querySelectorAll("link[rel='icon'], link[rel='shortcut icon'], link[rel='apple-touch-icon']");
+    if (existingIcons.length) {
+      existingIcons.forEach(tag => tag.href = imageUrl);
+    } else {
+      const link = document.createElement('link');
+      link.rel = 'icon';
+      link.href = imageUrl;
+      document.head.appendChild(link);
+
+      const apple = document.createElement('link');
+      apple.rel = 'apple-touch-icon';
+      apple.href = imageUrl;
+      document.head.appendChild(apple);
+    }
+
+    showModal("Favicon updated successfully!");
+  } catch (err) {
+    console.error("Favicon upload error:", err);
+    showModal("Error uploading favicon: " + (err.message || err));
+  } finally {
+    button.disabled = false;
+    button.textContent = 'Upload New Favicon';
+    form.reset();
+  }
+};
+
+// Load current favicon into admin preview
+const loadFaviconManager = async () => {
+  const img = document.getElementById('current-favicon');
+  if (!img) return;
+  try {
+    const favRef = doc(db, "settings", "favicon");
+    const favSnap = await getDoc(favRef);
+    if (favSnap.exists() && favSnap.data().url) {
+      img.src = favSnap.data().url;
+    } else {
+      img.src = ''; // no favicon yet
+    }
+  } catch (err) {
+    console.error("Could not load favicon:", err);
+  }
+};
+
+// Keep <head> favicon in sync with Firestore (live updates)
+const setFaviconFromDB = () => {
+  const faviconRef = doc(db, "settings", "favicon");
+  onSnapshot(faviconRef, (docSnap) => {
+    if (docSnap.exists() && docSnap.data().url) {
+      const url = docSnap.data().url;
+      let link = document.querySelector("link[rel='icon']");
+      if (!link) {
+        link = document.createElement('link');
+        link.rel = 'icon';
+        document.head.appendChild(link);
+      }
+      link.href = url;
+
+      // update other existing tags if present
+      const sizes16 = document.querySelector("link[rel='icon'][sizes='16x16']");
+      if (sizes16) sizes16.href = url;
+      const sizes32 = document.querySelector("link[rel='icon'][sizes='32x32']");
+      if (sizes32) sizes32.href = url;
+      const apple = document.querySelector("link[rel='apple-touch-icon']");
+      if (apple) apple.href = url;
+    }
+  }, (err) => console.error("Favicon snapshot error:", err));
+};
+
 
         const handleBannerUpdate = async (e) => {
             e.preventDefault();
@@ -2467,7 +2692,56 @@
                 });
             });
         };
-        
+        // ===== Dynamic Pages =====
+async function loadPagesIntoNav() {
+  const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+  const pagesPath = `/artifacts/${appId}/public/data/pages`;
+  const q = query(collection(db, pagesPath), where('navVisible', '==', true), orderBy('navOrder', 'asc'));
+  const snapshot = await getDocs(q);
+  if (!snapshot.empty) {
+    const nav = document.getElementById('primary-nav');
+    snapshot.docs.forEach(docSnap => {
+      const p = docSnap.data();
+      if (!nav.querySelector(`[data-page="${p.slug}"]`)) {
+        const a = document.createElement('a');
+        a.href = '#'+p.slug;
+        a.dataset.page = p.slug;
+        a.className = 'nav-item hover:text-[var(--primary)] transition-colors';
+        a.textContent = p.navLabel || p.title;
+        a.addEventListener('click', (e) => { e.preventDefault(); navigateTo(p.slug); });
+        nav.appendChild(a);
+      }
+    });
+  }
+}
+
+function renderDynamicPage(p) {
+  mainContent.innerHTML = `
+    <div class="section-padding bg-[var(--background-alt)]">
+      <div class="container mx-auto px-4">
+        <h1 class="text-4xl font-bold text-center">${p.title}</h1>
+        <p class="text-center text-gray-600 mb-6">${p.description || ''}</p>
+        <div class="flex flex-wrap justify-center gap-4">
+          ${(p.images || []).map(src => `<img src="${src}" class="w-64 rounded-lg shadow-md"/>`).join('')}
+        </div>
+        <div class="mt-6 prose max-w-3xl mx-auto">${p.contentHtml || ''}</div>
+      </div>
+    </div>
+  `;
+}
+
+async function tryRenderDynamicPage(slug) {
+  const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+  const pagesPath = `/artifacts/${appId}/public/data/pages`;
+  const q = query(collection(db, pagesPath), where('slug', '==', slug), limit(1));
+  const snapshot = await getDocs(q);
+  if (!snapshot.empty) {
+    renderDynamicPage(snapshot.docs[0].data());
+    return true;
+  }
+  return false;
+}
+
         // --- Router ---
         const navigateTo = async (page, scrollToId = null) => {
             // Detach any active Firestore listeners from the previous page
@@ -2478,11 +2752,15 @@
             
             history.pushState({ page: page }, '', `#${page}`);
             
-            if (pages[page]) {
+           if (pages[page]) {
                 await pages[page]();
             } else {
-                await pages.home(); // Default to home
-            }
+                const found = await tryRenderDynamicPage(page);
+                if (!found) {
+                    await pages.home();
+                }
+}
+
             
             // Wait a moment for content to be in DOM, then run animations
             setTimeout(() => {
@@ -3102,12 +3380,17 @@
                 const initialPage = window.location.hash.substring(1) || 'home';
                 loadLogo();
                 await navigateTo(initialPage);
+
                 
                 // Make content visible after initial load
                 mainContent.style.visibility = 'visible';
                 document.querySelector('footer').style.visibility = 'visible';
                 
                 renderSocialLinks();
+
+                // keep <head> favicon in sync with Firestore
+                setFaviconFromDB();
+
                 
                 // --- Initialize Live Features ---
                 const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
@@ -3168,3 +3451,4 @@
     </script>
 </body>
 </html>
+
