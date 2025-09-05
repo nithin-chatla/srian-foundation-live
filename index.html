@@ -1326,16 +1326,35 @@
                         topDonorsContainer.innerHTML = '';
                         return;
                     }
+                                        // Adjust spacing if fewer donors
+                    if (topThree.length < 3) {
+                        topDonorsContainer.classList.remove("mb-20");
+                        topDonorsContainer.classList.add("mb-10"); // smaller margin
+                    } else {
+                        topDonorsContainer.classList.remove("mb-10");
+                        topDonorsContainer.classList.add("mb-20"); // original big margin
+                    }
+
                     const medals = ['🥇', '🥈', '🥉'];
                     
                     let orderedTopThree = [...topThree];
                     if (topThree.length > 1) {
                         orderedTopThree = [topThree[1], topThree[0], ...topThree.slice(2)];
                     }
+                    // Dynamic grid based on donor count
+                    let gridClass = "grid-cols-1 justify-center";
+                    if (orderedTopThree.length === 2) {
+                        gridClass = "grid-cols-1 sm:grid-cols-2 justify-center";
+                    } else if (orderedTopThree.length >= 3) {
+                        gridClass = "grid-cols-1 md:grid-cols-3 gap-8";
+                    }
+
 
                     topDonorsContainer.innerHTML = `
                         <h2 class="text-3xl font-bold text-center text-[var(--text-primary)] mb-8 section-title">Our Top Supporters</h2>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
+                        <div class="flex flex-wrap justify-center gap-8">
+
+
                             ${orderedTopThree.map((donor, index) => {
                                 const originalIndex = topThree.indexOf(donor);
                                 const initials = donor.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
@@ -1364,7 +1383,12 @@
                         restOfDonorsContainer.innerHTML = `<p class="text-center text-[var(--text-secondary)]">No other donors found.</p>`;
                         return;
                     }
-                    restOfDonorsContainer.innerHTML = `<div class="space-y-4">${donorsToRender.map((donor) => {
+                    const wrapperClass = donorsToRender.length === 1 
+                        ? "flex justify-center" 
+                        : "space-y-4";
+
+                    restOfDonorsContainer.innerHTML = `<div class="${wrapperClass}">${donorsToRender.map((donor) => {
+
                         const date = donor.timestamp ? new Date(donor.timestamp.toDate()).toLocaleDateString() : 'N/A';
                         const initials = donor.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
                         const imageSrc = donor.imageUrl || `https://placehold.co/48x48/E0E7FF/3730A3?text=${initials}`;
@@ -3144,4 +3168,3 @@
     </script>
 </body>
 </html>
-
