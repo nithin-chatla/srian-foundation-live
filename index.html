@@ -208,6 +208,18 @@
             transform: scale(1.05);
             box-shadow: 0 4px 14px 0 rgba(0, 118, 255, 0.39);
         }
+        img {
+        pointer-events: none;   /* disables drag */
+        -webkit-user-drag: none; 
+        user-select: none;      /* disables text selection */
+        }
+        img {
+        pointer-events: auto;   /* allow hover but block right click via JS */
+        -webkit-user-drag: none;
+        user-select: none;
+        }
+
+
     </style>
 </head>
 <body>
@@ -3553,5 +3565,55 @@ async function tryRenderDynamicPage(slug) {
         document.addEventListener('DOMContentLoaded', initApp);
 
     </script>
+    <script>
+        // Disable right-click context menu
+        document.addEventListener("contextmenu", (e) => {
+        e.preventDefault();
+        });
+
+        // Disable F12, Ctrl+Shift+I, Ctrl+U, Ctrl+S
+        document.addEventListener("keydown", (e) => {
+        if (e.key === "F12" || 
+            (e.ctrlKey && (e.key === "u" || e.key === "U" || e.key === "s" || e.key === "S")) ||
+            (e.ctrlKey && e.shiftKey && (e.key === "I" || e.key === "i"))) {
+            e.preventDefault();
+        }
+        });
+        </script>
+        <script>
+// Show warning modal or alert
+function showProtectWarning() {
+  alert("⚠️ Srian Foundation has disabled this action.");
+}
+
+// Disable right-click (context menu)
+document.addEventListener("contextmenu", (e) => {
+  e.preventDefault();
+  showProtectWarning();
+});
+
+// Disable drag on images
+document.querySelectorAll("img").forEach(img => {
+  img.addEventListener("dragstart", (e) => {
+    e.preventDefault();
+    showProtectWarning();
+  });
+});
+
+// Disable common inspect shortcuts
+document.addEventListener("keydown", (e) => {
+  if (
+    e.key === "F12" || 
+    (e.ctrlKey && (e.key.toLowerCase() === "u" || e.key.toLowerCase() === "s")) || 
+    (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === "i")
+  ) {
+    e.preventDefault();
+    showProtectWarning();
+  }
+});
+</script>
+
+
 </body>
 </html>
+
