@@ -2435,6 +2435,83 @@
                 }
             });
         };
+        // 🔹 Custom form validation for all forms
+function setupCustomFormValidation(formSelector) {
+  const form = document.querySelector(formSelector);
+  if (!form) return;
+
+  form.addEventListener("submit", (e) => {
+    let valid = true;
+
+    // Clear old error messages
+    form.querySelectorAll(".error-message").forEach(el => el.remove());
+    form.querySelectorAll(".input-error").forEach(el => el.classList.remove("input-error"));
+
+    // Loop through required inputs
+    form.querySelectorAll("[required]").forEach(input => {
+      if (!input.value.trim()) {
+        valid = false;
+        input.classList.add("input-error");
+
+        // Add error message below input
+        const msg = document.createElement("p");
+        msg.className = "error-message";
+        msg.innerText = `${input.previousElementSibling?.innerText || "This field"} is required`;
+        input.insertAdjacentElement("afterend", msg);
+      }
+    });
+
+    if (!valid) {
+      e.preventDefault(); // stop form from submitting
+    }
+  });
+}
+
+// ✅ Apply to both your forms
+setupCustomFormValidation("#donation-form");
+setupCustomFormValidation("#home-contact-section form");
+setupCustomFormValidation("#template-contact form");
+function attachFormValidation(container) {
+  const forms = container.querySelectorAll("form");
+  forms.forEach(form => {
+    form.setAttribute("novalidate", "true"); // disable browser default
+
+    form.addEventListener("submit", (e) => {
+      let valid = true;
+
+      // Clear old errors
+      form.querySelectorAll(".error-message").forEach(el => el.remove());
+      form.querySelectorAll(".input-error").forEach(el => el.classList.remove("input-error"));
+
+      // Check required fields
+      form.querySelectorAll("[required]").forEach(input => {
+        if (!input.value.trim()) {
+          valid = false;
+          input.classList.add("input-error");
+
+          const msg = document.createElement("p");
+          msg.className = "error-message";
+          msg.innerText = `${input.previousElementSibling?.innerText || "This field"} is required`;
+          input.insertAdjacentElement("afterend", msg);
+        } else if (input.type === "email" && !/\S+@\S+\.\S+/.test(input.value)) {
+          valid = false;
+          input.classList.add("input-error");
+
+          const msg = document.createElement("p");
+          msg.className = "error-message";
+          msg.innerText = `Please enter a valid email`;
+          input.insertAdjacentElement("afterend", msg);
+        }
+      });
+
+      if (!valid) {
+        e.preventDefault();
+      }
+    });
+  });
+}
+
+
 
         // ========== Handle Create Page ==========
 const createPageForm = document.getElementById('create-page-form');
@@ -3528,6 +3605,8 @@ async function tryRenderDynamicPage(slug) {
 
                 // keep <head> favicon in sync with Firestore
                 setFaviconFromDB();
+                attachFormValidation(mainContent);
+
 
                 
                 // --- Initialize Live Features ---
@@ -3690,4 +3769,3 @@ document.addEventListener("keydown", (e) => {
 
 </body>
 </html>
-
