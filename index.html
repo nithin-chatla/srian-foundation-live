@@ -17,19 +17,22 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <!-- Optimized Font Loading -->
-    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Dancing+Script:wght@400..700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Playfair+Display&family=Dancing+Script&display=swap" rel="stylesheet" />
+
     <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Dancing+Script:wght@400..700&display=swap"></noscript>
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
     
     <!-- GSAP Animation Library -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
-    
-    <!-- PDF & Image Generation Libraries -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdn.tailwindcss.com" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" defer></script>
+
 
 
     <style>
@@ -238,6 +241,15 @@
   20%, 60% { transform: translateX(-5px); }
   40%, 80% { transform: translateX(5px); }
 }
+#contact-floating-btn {
+    animation: pulse 1.5s infinite;
+}
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+    100% { transform: scale(1); }
+}
+
 
 
 
@@ -245,13 +257,22 @@
     </style>
 </head>
 <body>
+    <style>
+    body { opacity: 0; transition: opacity 0.2s ease; }
+</style>
+<script>
+    window.addEventListener("load", () => {
+        document.body.style.opacity = "1";
+    });
+</script>
+
     
     <!-- App Shell: Header, Main Content, Footer -->
     <div id="app-shell">
         <header class="bg-[var(--background-card)]/80 backdrop-blur-md shadow-sm sticky top-0 z-40">
             <div class="container mx-auto flex justify-between items-center p-4">
                 <a href="#" data-page="home" class="nav-link flex items-center gap-2 text-2xl font-bold gold-text">
-                    <img id="website-logo" src="https://ik.imagekit.io/gmxabb1dm/srian-logo.png?updatedAt=1753800313508" alt="Srian Foundation Logo" class="h-10 w-10 rounded-full">
+                    <img id="website-logo" src="https://ik.imagekit.io/gmxabb1dm/srian-logo.png?updatedAt=1753800313508" alt="Srian Foundation Logo" class="h-10 w-10 rounded-full" loading="lazy">
                     <span class="text-[var(--text-primary)]">Srian Foundation</span>
                 </a>
                 <nav id="primary-nav" class="hidden md:flex space-x-6 items-center text-[var(--text-secondary)]">
@@ -362,9 +383,11 @@
 
 
     <!-- Theme Switcher -->
-    <button id="theme-switcher" title="Cycle Themes">
-        <i class="fas fa-palette"></i>
-    </button>
+   <button id="theme-switcher"
+        class="fixed bottom-6 left-6 z-40 bg-[var(--background-card)] text-[var(--text-primary)] border border-[var(--background-alt)] w-12 h-12 rounded-full flex items-center justify-center shadow-md cursor-pointer">
+    <i class="fas fa-palette"></i>
+</button>
+
 
     <!-- Page Templates -->
     <template id="template-home">
@@ -388,7 +411,7 @@
                     </div>
                 </div>
                 <div class="md:w-1/2 mt-12 md:mt-0 z-10 hero-img">
-                    <img id="hero-image" src="https://ik.imagekit.io/gmxabb1dm/Download%20Donation%20box%20and%20charity%20concept_%20Human%20hands%20putting%20money%20cash%20love%20and%20heart%20to%20donation%20box%20together%20helping%20doing%20charity%20vector%20illustration%20for%20free.jpeg?updatedAt=1753799288747" alt="A child studying happily" class="rounded-2xl shadow-2xl w-full" loading="eager" fetchpriority="high"/>
+                    <img id="hero-image" src="https://ik.imagekit.io/gmxabb1dm/Download%20Donation%20box%20and%20charity%20concept_%20Human%20hands%20putting%20money%20cash%20love%20and%20heart%20to%20donation%20box%20together%20helping%20doing%20charity%20vector%20illustration%20for%20free.jpeg?updatedAt=1753799288747" alt="A child studying happily" class="rounded-2xl shadow-2xl w-full" loading="eager" fetchpriority="high" loading="lazy"/>
                 </div>
             </div>
         </section>
@@ -551,6 +574,7 @@
         </div>
     </template>
     
+    
     <template id="template-admin">
         <div class="section-padding bg-gray-100">
             <div id="admin-view-container">
@@ -558,6 +582,16 @@
             </div>
         </div>
     </template>
+    <script>
+document.getElementById("contact-floating-btn").addEventListener("click", () => {
+    document.getElementById("contact-popup").classList.toggle("hidden");
+});
+
+document.getElementById("close-popup").addEventListener("click", () => {
+    document.getElementById("contact-popup").classList.add("hidden");
+});
+</script>
+
 
     <!-- Scripts -->
     <script type="module">
@@ -620,7 +654,8 @@
         const showGoalDetailsModal = (goal) => {
             const percentage = Math.min((goal.currentAmount / goal.targetAmount) * 100, 100);
             goalModalContent.innerHTML = `
-                <img src="${goal.imageUrl}" alt="${goal.title}" class="rounded-lg w-full h-48 object-cover mb-4">
+                <img src="${goal.imageUrl}" alt="${goal.title}" class="rounded-lg w-full h-48 object-cover mb-4" loading="lazy"
+>
                 <h2 class="text-2xl font-bold text-[var(--text-primary)]">${goal.title}</h2>
                 <p class="mt-2 text-[var(--text-secondary)] text-left">${goal.description}</p>
                 <div class="mt-4">
@@ -709,7 +744,8 @@
 
             let donorImageHTML = '';
             if (donorImageUrl) {
-                donorImageHTML = `<img src="${donorImageUrl}" alt="${name}" class="w-24 h-24 rounded-full mx-auto border-4 border-amber-300 shadow-lg object-cover mb-4">`;
+                donorImageHTML = `<img src="${donorImageUrl}" alt="${name}" class="w-24 h-24 rounded-full mx-auto border-4 border-amber-300 shadow-lg object-cover mb-4" loading="lazy"
+>`;
             }
 
             thankYouModalContent.innerHTML = `
@@ -722,7 +758,8 @@
                             
                             <!-- Watermark -->
                             <div class="absolute inset-0 flex justify-center items-center z-0">
-                                <img id="watermark-logo" src="" alt="Logo Watermark" class="h-48 w-48 opacity-5">
+                                <img id="watermark-logo" src="" alt="Logo Watermark" class="h-48 w-48 opacity-5" loading="lazy"
+>
                             </div>
 
                             <!-- Award Ribbon SVG -->
@@ -758,7 +795,8 @@
                             <!-- Main Content -->
                             <div class="relative z-10 flex flex-col items-center mt-12">
                                 <div class="flex items-center gap-3">
-                                    <img id="header-logo" src="" alt="Logo" class="h-14 w-14 rounded-full border-2 border-amber-300 shadow-lg">
+                                    <img id="header-logo" src="" alt="Logo" class="h-14 w-14 rounded-full border-2 border-amber-300 shadow-lg" loading="lazy"
+>
                                     <div>
                                         <h3 class="font-bold text-xl text-amber-900" style="font-family: 'Poppins', sans-serif;">Srian Foundation</h3>
                                         <p class="text-xs text-amber-800 tracking-widest uppercase">Certificate of Appreciation</p>
@@ -973,7 +1011,8 @@
                     </div>
                     <div class="goal-card mt-12 max-w-4xl mx-auto bg-[var(--background-card)] rounded-2xl shadow-lg overflow-hidden flex flex-col md:flex-row items-center gap-8 p-8">
                         <div class="md:w-1/3">
-                            <img src="${goal.imageUrl}" alt="${goal.title}" class="rounded-lg w-full h-48 object-cover">
+                            <img src="${goal.imageUrl}" alt="${goal.title}" class="rounded-lg w-full h-48 object-cover" loading="lazy"
+>
                         </div>
                         <div class="md:w-2/3 text-left">
                             <h3 class="text-2xl font-bold text-[var(--text-primary)]">${goal.title}</h3>
@@ -1332,7 +1371,8 @@
                     goalsContainer.innerHTML = allGoalsData.map(goal => {
                         return `
                             <div class="goal-card hover-card bg-[var(--background-card)] rounded-2xl shadow-lg overflow-hidden flex flex-col">
-                                <img src="${goal.imageUrl}" alt="${goal.title}" class="w-full h-64 object-cover">
+                                <img src="${goal.imageUrl}" alt="${goal.title}" class="w-full h-64 object-cover" loading="lazy"
+>
                                 <div class="p-6 flex flex-col flex-grow">
                                     <h3 class="text-xl font-bold text-[var(--text-primary)]">${goal.title}</h3>
                                     <p class="mt-2 text-sm text-[var(--text-secondary)] flex-grow">${goal.description.substring(0, 100)}...</p>
@@ -1412,7 +1452,8 @@
                                 return `
                                     <div class="top-donor-card hover-card bg-[var(--background-card)] p-6 rounded-2xl shadow-lg text-center ${scaleClass}">
                                         <div class="relative inline-block">
-                                            <img src="${imageSrc}" alt="${donor.name}" class="w-32 h-32 rounded-full mx-auto border-4 border-white shadow-md object-cover" />
+                                            <img src="${imageSrc}" alt="${donor.name}" class="w-32 h-32 rounded-full mx-auto border-4 border-white shadow-md object-cover" loading="lazy"
+ />
                                             <span class="absolute -top-2 -right-2 text-4xl">${medal}</span>
                                         </div>
                                         <h3 class="text-2xl font-bold mt-4 text-[var(--text-primary)]">${donor.name}</h3>
@@ -1443,7 +1484,8 @@
                         return `
                             <div class="donor-list-item flex items-center justify-between p-4 bg-[var(--background-alt)] rounded-lg">
                                 <div class="flex items-center gap-4">
-                                    <img src="${imageSrc}" alt="${donor.name}" class="w-12 h-12 rounded-full object-cover" />
+                                    <img src="${imageSrc}" alt="${donor.name}" class="w-12 h-12 rounded-full object-cover" loading="lazy"
+ />
                                     <div>
                                         <p class="font-semibold text-[var(--text-primary)]">${donor.name}</p>
                                         <p class="text-sm text-[var(--text-secondary)]">${donor.location}</p>
@@ -1513,7 +1555,8 @@
                     }
                     galleryGrid.innerHTML = snapshot.docs.map(doc => {
                         const image = doc.data();
-                        return `<div class="gallery-item shadow-md"><img src="${image.imageUrl}" class="w-full h-full object-cover" /></div>`
+                        return `<div class="gallery-item shadow-md"><img src="${image.imageUrl}" class="w-full h-full object-cover" loading="lazy"
+ /></div>`
                     }).join('');
                     runPageAnimations('gallery');
                 });
@@ -1576,7 +1619,8 @@
                         <h1 class="text-3xl font-bold text-gray-800 mb-4">Admin Login</h1>
                         <p class="text-gray-600 mb-6">Please sign in with an authorized Google account to access the dashboard.</p>
                         <button id="admin-google-login-btn" class="bg-white text-gray-700 font-semibold px-6 py-3 rounded-full w-full border border-gray-300 hover:bg-gray-50 flex items-center justify-center gap-3">
-                            <img src="https://www.google.com/favicon.ico" alt="Google icon" class="w-5 h-5" />
+                            <img src="https://www.google.com/favicon.ico" alt="Google icon" class="w-5 h-5" loading="lazy"
+/>
                             Sign in with Google
                         </button>
                     </div>
@@ -1710,7 +1754,8 @@
                         </form>
 
                         <div class="mt-4 flex items-center gap-4">
-                            <img id="current-favicon" src="" alt="Current favicon preview" class="w-12 h-12 rounded-full border" />
+                            <img id="current-favicon" src="" alt="Current favicon preview" class="w-12 h-12 rounded-full border" loading="lazy"
+/>
                             <div class="text-sm text-gray-600">Current favicon preview</div>
                         </div>
                         </div>
@@ -1738,7 +1783,8 @@
                             <form id="hero-image-form" class="space-y-2 pb-6 border-b">
                                 <label class="font-semibold">Homepage Hero Image</label>
                                 <div class="flex items-center gap-4">
-                                    <img id="hero-image-preview" src="[https://placehold.co/96x64/eee/ccc?text=Hero](https://placehold.co/96x64/eee/ccc?text=Hero)" alt="Hero preview" class="w-24 h-16 object-cover rounded-lg bg-gray-100"/>
+                                    <img id="hero-image-preview" src="[https://placehold.co/96x64/eee/ccc?text=Hero](https://placehold.co/96x64/eee/ccc?text=Hero)" alt="Hero preview" class="w-24 h-16 object-cover rounded-lg bg-gray-100" loading="lazy"
+/>
                                     <input type="file" name="imageFile" accept="image/*" class="p-2 border rounded-lg w-full file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" required />
                                     <button type="submit" class="bg-blue-600 text-white font-semibold px-6 py-2 rounded-full hover:bg-blue-700">Update</button>
                                 </div>
@@ -1747,7 +1793,8 @@
                             <form id="about-image-form" class="space-y-2">
                                 <label class="font-semibold">About Us Image</label>
                                 <div class="flex items-center gap-4">
-                                    <img id="about-image-preview" src="[https://placehold.co/96x64/eee/ccc?text=About](https://placehold.co/96x64/eee/ccc?text=About)" alt="About preview" class="w-24 h-16 object-cover rounded-lg bg-gray-100"/>
+                                    <img id="about-image-preview" src="[https://placehold.co/96x64/eee/ccc?text=About](https://placehold.co/96x64/eee/ccc?text=About)" alt="About preview" class="w-24 h-16 object-cover rounded-lg bg-gray-100" loading="lazy"
+/>
                                     <input type="file" name="imageFile" accept="image/*" class="p-2 border rounded-lg w-full file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" required />
                                     <button type="submit" class="bg-blue-600 text-white font-semibold px-6 py-2 rounded-full hover:bg-blue-700">Update</button>
                                 </div>
@@ -2116,7 +2163,8 @@
                     const image = doc.data();
                     return `
                         <div class="relative group">
-                            <img src="${image.imageUrl}" class="rounded-lg shadow-md w-full h-full object-cover" />
+                            <img src="${image.imageUrl}" class="rounded-lg shadow-md w-full h-full object-cover" loading="lazy"
+/>
                             <button data-id="${doc.id}" class="delete-gallery-btn absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">&times;</button>
                         </div>
                     `;
@@ -2937,7 +2985,8 @@ function renderDynamicPage(p) {
         <h1 class="text-4xl font-bold text-center">${p.title}</h1>
         <p class="text-center text-gray-600 mb-6">${p.description || ''}</p>
         <div class="flex flex-wrap justify-center gap-4">
-          ${(p.images || []).map(src => `<img src="${src}" class="w-64 rounded-lg shadow-md"/>`).join('')}
+          ${(p.images || []).map(src => `<img src="${src}" class="w-64 rounded-lg shadow-md" loading="lazy"
+/>`).join('')}
         </div>
         <div class="mt-6 prose max-w-3xl mx-auto">${p.contentHtml || ''}</div>
       </div>
@@ -3764,6 +3813,48 @@ document.addEventListener("keydown", (e) => {
 
 
 </script>
+
+<!-- Floating Contact Button -->
+<!-- Floating Contact Button -->
+<div id="contact-floating-btn"
+     class="fixed bottom-6 right-6 z-[9999] bg-green-600 text-white w-14 h-14 rounded-full shadow-xl cursor-pointer flex items-center justify-center text-3xl hover:scale-110 transition-all duration-300">
+    <i class="fas fa-headset"></i>
+</div>
+
+<!-- Contact Popup -->
+<div id="contact-popup"
+     class="fixed bottom-24 right-6 bg-white border border-gray-300 rounded-xl shadow-2xl p-4 w-64 z-50 hidden">
+    <h3 class="font-bold text-gray-800 text-lg mb-2">Contact Us</h3>
+    
+    <a href="tel:+916303518860" 
+       class="flex items-center gap-3 p-2 hover:bg-gray-100 rounded-lg">
+        <i class="fas fa-phone text-blue-600"></i> 
+        <span>Call: +91 6303518860</span>
+    </a>
+
+    <a href="https://wa.me/916303518860?text=Hello%20I%20am%20from%20your%20website
+e"
+
+       target="_blank"
+       class="flex items-center gap-3 p-2 hover:bg-gray-100 rounded-lg">
+        <i class="fab fa-whatsapp text-green-600"></i> 
+        <span>WhatsApp Chat</span>
+    </a>
+
+    <button id="close-popup" 
+            class="mt-3 w-full bg-gray-200 text-gray-800 p-2 rounded-lg hover:bg-gray-300">
+        Close
+    </button>
+</div>
+<script>
+document.getElementById("contact-floating-btn").addEventListener("click", () => {
+    document.getElementById("contact-popup").classList.toggle("hidden");
+});
+document.getElementById("close-popup").addEventListener("click", () => {
+    document.getElementById("contact-popup").classList.add("hidden");
+});
+</script>
+
 
 
 
